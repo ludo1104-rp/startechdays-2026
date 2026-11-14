@@ -205,7 +205,7 @@ html.aimant #titre{animation:none}
 #stage.muet{background:#000;filter:sepia(.85) grayscale(.25) contrast(1.15) brightness(.97)}
 #fx{position:absolute;inset:0;pointer-events:none;display:none}
 #fx.on{display:block}
-.grain{position:absolute;inset:-50px;opacity:.28;mix-blend-mode:multiply;
+.grain{position:absolute;inset:-50px;opacity:.2;mix-blend-mode:multiply;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.1 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E")}
 .vig{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 52%,rgba(20,10,0,.75) 100%)}
 .flick{position:absolute;inset:0;background:#fff8e0;opacity:0}
@@ -253,7 +253,7 @@ html.aimant #titre{animation:none}
 .v-card.on{border-color:#0a0a0a}
 .v-art{height:230px;display:grid;place-items:center}
 .v-body{flex:1;padding:28px 34px;display:flex;flex-direction:column;gap:16px}
-.v-num{font-family:var(--mono);font-size:26px;letter-spacing:.1em;color:#737373}
+.v-num{font-family:var(--mono);font-size:32px;letter-spacing:.1em;color:#737373}
 .v-t{font-size:42px;font-weight:600;line-height:1.12;letter-spacing:-.03em;color:#0a0a0a}
 .v-pan{width:640px;height:640px;border-radius:56px}
 .v-tag{width:700px;font-size:44px;line-height:1.3;color:#3c3c3c;white-space:pre-line;letter-spacing:-.015em}
@@ -648,6 +648,7 @@ const ST = $("stage"), FPS = 12;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const k = (t, a, b) => clamp((t - a) / (b - a));
 const eo = p => 1 - Math.pow(1 - p, 3);
+const ex = p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
 const bk = p => { if (p <= 0) return 0; if (p >= 1) return 1; const c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
 const lerp = (a, b, p) => a + (b - a) * p;
 const jr = n => (Math.random() * 2 - 1) * n;
@@ -656,7 +657,7 @@ function E(html, cls = "", parent = ST) { const d = document.createElement("div"
 let JIT = 1; /* 1 = tremblement du vieux film ; 0 = aujourd'hui (aucun tremblement) */
 function P(el, x, y, o = {}) {
   const s = o.s ?? 1, r = o.r ?? 0, op = o.o ?? 1, b = (o.b ?? 1) * JIT;
-  el.style.transform = `translate(${x + jr(b * 1.6)}px,${y + jr(b * 1.6)}px) translate(-50%,-50%) rotate(${r + jr(b * .7)}deg) scale(${s})`;
+  el.style.transform = `translate(${x + jr(b * .5)}px,${y + jr(b * .5)}px) translate(-50%,-50%) rotate(${r + jr(b * .25)}deg) scale(${s})`;
   el.style.opacity = op;
 }
 const pop = (t, a, d = .45) => bk(k(t, a, a + d));
@@ -762,8 +763,8 @@ const CLOCK = sv("0 0 200 200", 170, 170, `
 /* Ornement des cartons du film muet (dessiné, pas de symbole) */
 const ORN = `<svg width="260" height="26" viewBox="0 0 260 26" aria-hidden="true"><path d="M8 13h96M156 13h96" stroke="#e9dfc8" stroke-width="2"/><path d="M130 3l10 10-10 10-10-10z" fill="#e9dfc8"/><circle cx="111" cy="13" r="3.5" fill="#e9dfc8"/><circle cx="149" cy="13" r="3.5" fill="#e9dfc8"/></svg>`;
 function inter(html, d, extra) {
-  return { d, m: "muet", mk() { return { f: E(`<div class="frame"><div class="orn">${ORN}</div>${html}<div class="orn">${ORN}</div></div>`, "inter") }; },
-    up(c, t) { P(c.f, 800, 450, { o: fade(t, d, .2, .2), b: .5, s: extra && extra.shake ? 1 + .02 * Math.sin(t * 40) : 1, r: extra && extra.shake ? jr(1.2) : 0 }); } };
+  return { d, m: "muet", fixe: true, mk() { return { f: E(`<div class="frame"><div class="orn">${ORN}</div>${html}<div class="orn">${ORN}</div></div>`, "inter") }; },
+    up(c, t) { P(c.f, 800, 450, { o: fade(t, d, .2, .2), b: 0, s: extra && extra.shake ? 1 + .02 * Math.sin(t * 40) : 1, r: extra && extra.shake ? jr(1.2) : 0 }); } };
 }
 function wall() { return E(`<div class="full" style="background:linear-gradient(#d4ccbb 0 72%,#8d7c63 72%)"></div>`); }
 function studentRefs(el) { return { head: el.querySelector(".head"), mouth: el.querySelector(".mouth"), e1: el.querySelector(".e1"), e2: el.querySelector(".e2") }; }
@@ -780,11 +781,11 @@ function chap(nom) { CHAPTERS.push({ nom, at: SCENES.reduce((s, x) => s + x.d, 0
 
 /* ===== Partie 1 : le film muet ===== */
 chap("Le film muet");
-SCENES.push({ d: 4.5, m: "muet",
-  mk() { const c = {}; c.f = E(`<div class="frame"><div class="s">Les Films du Chêneux présentent</div><div class="xl">L’ÉCOLE D’AVANT</div><div class="s" style="font-size:34px">un film muet… et très ennuyant</div></div>`, "inter");
+SCENES.push({ d: 4.5, m: "muet", fixe: true,
+  mk() { const c = {}; c.f = E(`<div class="frame"><div class="s">Les Films du Chêneux présentent</div><div class="xl">L’ÉCOLE D’AVANT</div><div class="s" style="font-size:34px">un film muet… comme la classe</div></div>`, "inter");
     c.iris = E("", ""); c.iris.style.cssText = "border-radius:50%;box-shadow:0 0 0 1800px #000;"; return c; },
-  up(c, t) { P(c.f, 800, 450, { b: .5, o: 1 - k(t, 4.2, 4.5) }); const R = lerp(0, 2000, eo(k(t, 0, 1.2))); c.iris.style.width = c.iris.style.height = R + "px"; P(c.iris, 800, 450, { b: 0 }); } });
-SCENES.push(inter(`<div class="l">Autrefois, en classe…<br>on recopiait le tableau.<br>Encore. Et encore.</div>`, 4.5));
+  up(c, t) { P(c.f, 800, 450, { b: 0, o: 1 - k(t, 4.2, 4.5) }); const R = lerp(0, 2000, eo(k(t, 0, 1.2))); c.iris.style.width = c.iris.style.height = R + "px"; P(c.iris, 800, 450, { b: 0 }); } });
+SCENES.push(inter(`<div class="l">Leçon 1 : recopier.<br>Leçon 2 : recopier.<br>Leçon 3 : devinez…</div>`, 4.5));
 SCENES.push({ d: 5.5, m: "muet",
   mk() { const c = { bg: wall() }; c.board = E(`<div class="boardbox"><div class="chalk"></div></div>`); c.ch = c.board.querySelector(".chalk");
     c.clock = E(CLOCK); c.tc = E(TEACHER); c.arm = c.tc.querySelector(".arm"); c.st = E(STUDENT); c.r = studentRefs(c.st);
@@ -799,7 +800,7 @@ SCENES.push({ d: 5.5, m: "muet",
     P(c.st, 1240, 700, { b: .8 }); yawn(c.r, t, 1.4);
     c.r.head.setAttribute("transform", `rotate(${22 * eo(k(t, 3.8, 4.6))} 210 200) translate(0 ${30 * eo(k(t, 3.8, 4.6))})`);
   } });
-SCENES.push(inter(`<div class="l">Puis venaient…</div><div class="xl" style="font-size:96px">les photocopies.</div>`, 3.5));
+SCENES.push(inter(`<div class="l">Pour changer un peu…</div><div class="xl" style="font-size:96px">des photocopies.</div>`, 3.5));
 SCENES.push({ d: 4.8, m: "muet",
   mk() { const c = { bg: wall() }; c.st = E(STUDENT); c.r = studentRefs(c.st); c.sh = [];
     for (let i = 0; i < 26; i++) c.sh.push({ el: E("", "sheet"), r: jr(4), x: jr(10) });
@@ -812,7 +813,7 @@ SCENES.push({ d: 4.8, m: "muet",
       P(s.el, 800 + s.x, y, { r: p < 1 ? 25 * (1 - p) + s.r : s.r, o: t > a ? 1 : 0, b: .5 }); });
     P(c.label, 330, 120, { o: k(t, 1, 1.3), r: -4, b: .6 });
   } });
-SCENES.push(inter(`<div class="l">Une seule façon d’apprendre…<br>pour tout le monde.</div>`, 3.8));
+SCENES.push(inter(`<div class="l">Même leçon. Même rythme.<br>Pour tout le monde.</div>`, 3.8));
 SCENES.push({ d: 4.8, m: "muet",
   mk() { const c = { bg: wall(), s: [], z: [] }; for (let i = 0; i < 5; i++) { const el = E(STUDENT); el.style.width = "420px"; c.s.push({ el, r: studentRefs(el) }); }
     for (let i = 0; i < 5; i++) c.z.push(E(`<div class="zz">Z z z</div>`)); return c; },
@@ -822,7 +823,7 @@ SCENES.push({ d: 4.8, m: "muet",
       s.r.head.setAttribute("transform", `rotate(${(i % 2 ? -1 : 1) * 26 * eo(k(t, 2.6, 3.2))} 210 200) translate(0 ${34 * eo(k(t, 2.6, 3.2))})`); });
     c.z.forEach((z, i) => { const p = k(t, 3.1 + i * .08, 4.8); P(z, 180 + i * 310 + 40 * p, 470 - 160 * p, { o: p > 0 ? 1 - p * .6 : 0, s: .8 + .5 * p, b: .6 }); });
   } });
-SCENES.push(inter(`<div class="xl" style="font-size:150px">Que c’était<br>ennuyant !</div>`, 3.2));
+SCENES.push(inter(`<div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div>`, 3.2));
 
 /* =====================================================================
    PARTIE MODERNE — style de la vitrine : blanc, Figtree, pastels.
@@ -871,13 +872,13 @@ function confUp(list, t, a) { list.forEach(f => { const s = t - a; if (s < 0) { 
   P(f.el, f.x0 + f.vx * s, f.y0 + f.vy * s + 800 * s * s, { r: f.r * s, o: 1 - k(s, 1.4, 2) }); }); }
 
 /* Passage du film muet à aujourd'hui : un rond blanc s'ouvre, calmement */
-SCENES.push({ d: 2.6, m: "color",
-  mk() { const c = {}; c.f = E(`<div class="frame"><div class="xl" style="font-size:150px">Que c’était<br>ennuyant !</div></div>`, "inter sepia");
+SCENES.push({ d: 1.6, m: "color",
+  mk() { const c = {}; c.f = E(`<div class="frame"><div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div></div>`, "inter sepia");
     c.iris = E(`<div style="width:200px;height:200px;border-radius:50%;background:#fff"></div>`);
     c.dot = E(`<div style="width:56px;height:56px;border-radius:50%;background:#F0997B"></div>`); return c; },
-  up(c, t) { P(c.f, 800, 450, { s: lerp(1, .94, eo(k(t, .1, 1.6))) });
-    const p = eo(k(t, .6, 1.8)); P(c.iris, 800, 450, { s: p * 10.5, o: t > .6 ? 1 : 0 });
-    P(c.dot, 800, 450, { s: pop(t, 1.6, .5) * (1 - eo(k(t, 2.2, 2.6))), o: t > 1.6 ? 1 : 0 }); } });
+  up(c, t) { P(c.f, 800, 450);
+    const p = ex(k(t, .15, .7)); P(c.iris, 800, 450, { s: p * 10.5, o: t > .15 ? 1 : 0 });
+    P(c.dot, 800, 420, { s: pop(t, .6, .4) * (1 - eo(k(t, 1.4, 1.6))), o: t > .6 ? 1 : 0 }); } });
 
 /* ===== Partie 2 : le 1:1 ===== */
 chap("Le 1:1");
@@ -897,7 +898,7 @@ SCENES.push({ d: 6, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.r = ronds(); c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
     c.cap = E(`<div class="v-cap">Au Chêneux, chaque élève a sa tablette : un iPad.</div>`); return c; },
   up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t);
-    const p = eo(k(t, 0, 1)); P(c.ip, 800, lerp(1250, 360, p), { s: 1.12, r: lerp(6, 0, p) });
+    const p = ex(k(t, 0, .9)); P(c.ip, 800, lerp(1250, 360, p), { s: 1.12, r: lerp(6, 0, p) });
     c.apps.forEach((a, i) => { const q = eo(k(t, 1 + i * .14, 1.45 + i * .14)); a.style.transform = `scale(${q})`; a.style.opacity = q; });
     P(c.cap, 800, 790, { o: k(t, 2.2, 2.6), s: lerp(.94, 1, eo(k(t, 2.2, 2.7))) }); } });
 
@@ -918,7 +919,7 @@ SCENES.push({ d: 9, m: "color",
     c.cards = OBJ.map(([n, col, t], i) => E(`<div class="v-card"><div class="v-art" style="background:${col}">${ICO(n, 120)}</div><div class="v-body"><div class="v-num">0${i + 1}</div><div class="v-t">${t}</div></div></div>`)); return c; },
   up(c, t) { P(c.bg, 800, 450); P(c.h, 800, 125, { o: k(t, 0, .4) });
     c.cards.forEach((el, i) => { const a = .7 + i * 2.2, on = (t >= a && t < a + 2.2) || (i === 2 && t >= a);
-      const p = eo(k(t, a, a + .55)); el.firstChild.classList.toggle("on", on);
+      const p = ex(k(t, a, a + .5)); el.firstChild.classList.toggle("on", on);
       P(el, 330 + i * 470, 530 + 60 * (1 - p), { o: p, s: on ? 1.04 : .97 }); }); } });
 
 SCENES.push({ d: 6.5, m: "color",
@@ -949,7 +950,7 @@ function trailer(n, title, tag, col, ill) {
     mk() { const c = { bg: E(WHITE) }; c.pan = E(`<div class="v-pan" style="background:${col}"></div>`); c.ill = E("", "ill"); c.i = ill.mk(c.ill);
       const fin = /…$/.test(title) ? "" : `<span style="color:#F0997B">.</span>`;
       c.t = E(`<div class="v-h" style="font-size:100px;width:700px;white-space:normal;line-height:1">${title}${fin}</div>`); c.g = E(`<div class="v-tag">${tag}</div>`); return c; },
-    up(c, t) { const pin = eo(k(t, 0, .55)), out = k(t, 3.85, 4.2), o = 1 - out;
+    up(c, t) { const pin = ex(k(t, 0, .5)), out = k(t, 3.85, 4.2), o = 1 - out;
       P(c.bg, 800, 450); P(c.pan, lerp(-380, 430, pin), 450, { o });
       P(c.ill, lerp(-380, 430, pin), 450, { o }); ill.up(c.i, t);
       const pt = eo(k(t, .1, .65)); P(c.t, 1180 + 160 * (1 - pt), 400, { o: pt * o });
@@ -1029,10 +1030,10 @@ function render() {
   SCENES[i].up(ctx, t);
   fx.classList.toggle("on", muet);
   if (muet) {
-    $("grain").style.transform = `translate(${jr(40)}px,${jr(40)}px)`; $("flick").style.opacity = Math.random() * .1;
-    ["scr1", "scr2"].forEach(id => { const s = $(id); s.style.left = Math.random() * 100 + "%"; s.style.opacity = Math.random() > .5 ? Math.random() : 0; });
+    $("grain").style.transform = `translate(${jr(40)}px,${jr(40)}px)`; $("flick").style.opacity = Math.random() * .05;
+    ["scr1", "scr2"].forEach(id => { const s = $(id); s.style.left = Math.random() * 100 + "%"; s.style.opacity = Math.random() > .88 ? Math.random() * .6 : 0; });
   }
-  ST.style.transform = `scale(${SCALE})` + (muet ? ` translate(${jr(2)}px,${jr(3)}px)` : "");
+  ST.style.transform = `scale(${SCALE})` + (muet && !SCENES[i].fixe ? ` translate(${jr(.7)}px,${jr(1)}px)` : "");
 }
 function tick(now) {
   if (!playing) return;

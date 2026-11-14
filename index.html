@@ -242,6 +242,7 @@ html.aimant #titre{animation:none}
 .v-mk{background:linear-gradient(#FDE5D3,#FDE5D3) no-repeat 0 92%/100% 40%;padding:0 .06em}
 .v-eye{font-family:var(--mono);font-size:30px;letter-spacing:.14em;text-transform:uppercase;color:#737373;white-space:nowrap}
 .v-cap{max-width:1320px;text-align:center;background:#fff;border:2px solid #ececec;border-radius:999px;padding:24px 48px;font-size:46px;font-weight:500;line-height:1.2;letter-spacing:-.02em;color:#3c3c3c;white-space:nowrap;box-shadow:0 16px 40px rgba(10,10,10,.06)}
+.v-sub{text-align:center;white-space:nowrap;font-size:54px;font-weight:600;line-height:1.2;letter-spacing:-.025em;color:#1a1a1a}.v-sub .w{display:inline-block;will-change:transform,opacity}.v-sub .v-hl{background:linear-gradient(#FDE5D3,#FDE5D3) no-repeat 0 88%/0% 42%;padding:0 .08em}
 .v-rond{border-radius:50%}
 .v-ipad{width:560px;height:420px;background:#0a0a0a;border-radius:54px;padding:22px;box-shadow:0 30px 70px rgba(10,10,10,.14)}
 .v-scr{width:100%;height:100%;background:#fff;border-radius:32px;display:flex;flex-direction:column;padding:22px 30px 30px}
@@ -649,6 +650,12 @@ const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const k = (t, a, b) => clamp((t - a) / (b - a));
 const eo = p => 1 - Math.pow(1 - p, 3);
 const ex = p => p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+/* Sous-titre sans cadre : mots qui montent un par un (60 ms), [mot clé] surligné pêche qui se déroule */
+const SUB = txt => `<div class="v-sub">${txt.match(/\[[^\]]+\][^ ]*|[^ ]+/g).map(w => { w = w.replace(/\?$/, `<span style="color:#F0997B">?</span>`);
+  return w[0] === "[" ? `<span class="w"><span class="v-hl">${w.slice(1, w.indexOf("]"))}</span>${w.slice(w.indexOf("]") + 1)}</span>` : `<span class="w">${w}</span>`; }).join(" ")}</div>`;
+function subUp(el, t, a, o = 1) { const ws = el.querySelectorAll(".w");
+  ws.forEach((w, i) => { const q = ex(k(t, a + i * .06, a + i * .06 + .45)); w.style.opacity = q * o; w.style.transform = `translateY(${22 * (1 - q)}px)`; });
+  const hl = el.querySelector(".v-hl"); if (hl) { const b = a + ws.length * .06 + .15; hl.style.backgroundSize = `${100 * eo(k(t, b, b + .5))}% 42%`; } }
 const bk = p => { if (p <= 0) return 0; if (p >= 1) return 1; const c = 2.2; return 1 + (c + 1) * Math.pow(p - 1, 3) + c * Math.pow(p - 1, 2); };
 const lerp = (a, b, p) => a + (b - a) * p;
 const jr = n => (Math.random() * 2 - 1) * n;
@@ -785,7 +792,7 @@ SCENES.push({ d: 4.5, m: "muet", fixe: true,
   mk() { const c = {}; c.f = E(`<div class="frame"><div class="s">Les Films du Chêneux présentent</div><div class="xl">L’ÉCOLE D’AVANT</div><div class="s" style="font-size:34px">un film muet… comme la classe</div></div>`, "inter");
     c.iris = E("", ""); c.iris.style.cssText = "border-radius:50%;box-shadow:0 0 0 1800px #000;"; return c; },
   up(c, t) { P(c.f, 800, 450, { b: 0, o: 1 - k(t, 4.2, 4.5) }); const R = lerp(0, 2000, eo(k(t, 0, 1.2))); c.iris.style.width = c.iris.style.height = R + "px"; P(c.iris, 800, 450, { b: 0 }); } });
-SCENES.push(inter(`<div class="l">Leçon 1 : recopier.<br>Leçon 2 : recopier.<br>Leçon 3 : devinez…</div>`, 4.5));
+SCENES.push(inter(`<div class="l">Leçon 1 : recopier.<br>Leçon 2 : recopier.<br>Leçon 3 : devinez…</div>`, 3.4));
 SCENES.push({ d: 5.5, m: "muet",
   mk() { const c = { bg: wall() }; c.board = E(`<div class="boardbox"><div class="chalk"></div></div>`); c.ch = c.board.querySelector(".chalk");
     c.clock = E(CLOCK); c.tc = E(TEACHER); c.arm = c.tc.querySelector(".arm"); c.st = E(STUDENT); c.r = studentRefs(c.st);
@@ -800,7 +807,7 @@ SCENES.push({ d: 5.5, m: "muet",
     P(c.st, 1240, 700, { b: .8 }); yawn(c.r, t, 1.4);
     c.r.head.setAttribute("transform", `rotate(${22 * eo(k(t, 3.8, 4.6))} 210 200) translate(0 ${30 * eo(k(t, 3.8, 4.6))})`);
   } });
-SCENES.push(inter(`<div class="l">Pour changer un peu…</div><div class="xl" style="font-size:96px">des photocopies.</div>`, 3.5));
+SCENES.push(inter(`<div class="l">Pour changer un peu…</div><div class="xl" style="font-size:96px">des photocopies.</div>`, 2.6));
 SCENES.push({ d: 4.8, m: "muet",
   mk() { const c = { bg: wall() }; c.st = E(STUDENT); c.r = studentRefs(c.st); c.sh = [];
     for (let i = 0; i < 26; i++) c.sh.push({ el: E("", "sheet"), r: jr(4), x: jr(10) });
@@ -813,7 +820,7 @@ SCENES.push({ d: 4.8, m: "muet",
       P(s.el, 800 + s.x, y, { r: p < 1 ? 25 * (1 - p) + s.r : s.r, o: t > a ? 1 : 0, b: .5 }); });
     P(c.label, 330, 120, { o: k(t, 1, 1.3), r: -4, b: .6 });
   } });
-SCENES.push(inter(`<div class="l">Même leçon. Même rythme.<br>Pour tout le monde.</div>`, 3.8));
+SCENES.push(inter(`<div class="l">Même leçon. Même rythme.<br>Pour tout le monde.</div>`, 3.0));
 SCENES.push({ d: 4.8, m: "muet",
   mk() { const c = { bg: wall(), s: [], z: [] }; for (let i = 0; i < 5; i++) { const el = E(STUDENT); el.style.width = "420px"; c.s.push({ el, r: studentRefs(el) }); }
     for (let i = 0; i < 5; i++) c.z.push(E(`<div class="zz">Z z z</div>`)); return c; },
@@ -823,7 +830,7 @@ SCENES.push({ d: 4.8, m: "muet",
       s.r.head.setAttribute("transform", `rotate(${(i % 2 ? -1 : 1) * 26 * eo(k(t, 2.6, 3.2))} 210 200) translate(0 ${34 * eo(k(t, 2.6, 3.2))})`); });
     c.z.forEach((z, i) => { const p = k(t, 3.1 + i * .08, 4.8); P(z, 180 + i * 310 + 40 * p, 470 - 160 * p, { o: p > 0 ? 1 - p * .6 : 0, s: .8 + .5 * p, b: .6 }); });
   } });
-SCENES.push(inter(`<div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div>`, 3.2));
+SCENES.push(inter(`<div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div>`, 2.6));
 
 /* =====================================================================
    PARTIE MODERNE — style de la vitrine : blanc, Figtree, pastels.
@@ -886,32 +893,32 @@ SCENES.push({ d: 5.2, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.r = ronds();
     c.m = E(`<div style="width:600px;height:110px;border-radius:14px;background:#FDE5D3"></div>`);
     c.a = E(`<div class="v-h" style="font-size:360px">1</div>`); c.col = E(`<div class="v-h" style="font-size:360px;color:#F0997B">:</div>`); c.b = E(`<div class="v-h" style="font-size:360px">1</div>`);
-    c.q = E(`<div class="v-cap">C’est quoi ?</div>`); return c; },
+    c.q = E(SUB(`C’est quoi ?`)); return c; },
   up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .8));
     const st = (el, x, a) => { const p = eo(k(t, a, a + .6)); P(el, x, 420 + 70 * (1 - p), { o: p }); };
     st(c.a, 610, .2); st(c.col, 800, .45); st(c.b, 990, .7);
     const w = eo(k(t, 1.2, 1.9)); P(c.m, 800, 520, { o: w > 0 ? 1 : 0 }); c.m.firstChild.style.width = (600 * w) + "px";
-    P(c.q, 800, 745, { s: lerp(.9, 1, eo(k(t, 2.2, 2.7))), o: k(t, 2.2, 2.6) }); } });
+    P(c.q, 800, 745, { s: 1.25 }); subUp(c.q, t, 2.2); } });
 
 const TUILES = [["book", "#FDE5D3"], ["pencil", "#FAF0C8"], ["palette", "#FADDE3"], ["clap", "#DCE9FB"], ["cube", "#DCF1E4"], ["robot", "#E7E0FA"], ["mic", "#D3EFEC"], ["globe", "#FDE5D3"]];
 SCENES.push({ d: 6, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.r = ronds(); c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
-    c.cap = E(`<div class="v-cap">Au Chêneux, chaque élève a sa tablette : un iPad.</div>`); return c; },
+    c.cap = E(SUB(`Au Chêneux, chaque élève a [sa tablette] : un iPad.`)); return c; },
   up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t);
     const p = ex(k(t, 0, .9)); P(c.ip, 800, lerp(1250, 360, p), { s: 1.12, r: lerp(6, 0, p) });
     c.apps.forEach((a, i) => { const q = eo(k(t, 1 + i * .14, 1.45 + i * .14)); a.style.transform = `scale(${q})`; a.style.opacity = q; });
-    P(c.cap, 800, 790, { o: k(t, 2.2, 2.6), s: lerp(.94, 1, eo(k(t, 2.2, 2.7))) }); } });
+    P(c.cap, 800, 790); subUp(c.cap, t, 2.2); } });
 
 const BULLES = ["book", "bulb", "pencil", "numbers", "globe", "speech"];
 SCENES.push({ d: 5.8, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.title = E(`<div class="v-h" style="font-size:104px">Un outil pour <span class="v-mk">apprendre</span>.</div>`);
     c.ip = E(IPAD(TUILES)); c.b = BULLES.map((n, i) => E(`<div class="v-bulle" style="background:${PAS[i % 7]}">${ICO(n, 76)}</div>`));
-    c.cap = E(`<div class="v-cap">À l’école, la tablette aide chaque élève à apprendre.</div>`); return c; },
+    c.cap = E(SUB(`À l’école, la tablette aide [chaque élève] à apprendre.`)); return c; },
   up(c, t) { P(c.bg, 800, 450); P(c.title, 800, 125, { o: k(t, 0, .4), s: lerp(.96, 1, eo(k(t, 0, .6))) });
     P(c.ip, 800, 465, { s: .58 });
     c.b.forEach((b, i) => { const ang = (i / 6) * Math.PI * 2 + t * .35; const R = 330 * eo(k(t, .4 + i * .1, 1.2 + i * .1));
       P(b, 800 + Math.cos(ang) * R * 1.3, 465 + Math.sin(ang) * R * .62, { s: eo(k(t, .4 + i * .1, .9 + i * .1)) }); });
-    P(c.cap, 800, 815, { o: k(t, 1.6, 2) }); } });
+    P(c.cap, 800, 815); subUp(c.cap, t, 1.6); } });
 
 const OBJ = [["laptop", "#DCE9FB", "Développer les compétences numériques"], ["shuffle", "#FADDE3", "Varier les façons d’apprendre"], ["target", "#DCF1E4", "Un outil adapté à chaque élève"]];
 SCENES.push({ d: 9, m: "color",
@@ -945,44 +952,51 @@ SCENES.push({ d: 3.4, m: "color",
     c.t.querySelector(".v-cur").style.opacity = Math.floor(t * 2.4) % 2 ? 0 : 1;
     P(c.t, 800, 480, { o: 1 - k(t, 3.1, 3.4) }); } });
 
-function trailer(n, title, tag, col, ill) {
-  SCENES.push({ d: 4.2, m: "color",
-    mk() { const c = { bg: E(WHITE) }; c.pan = E(`<div class="v-pan" style="background:${col}"></div>`); c.ill = E("", "ill"); c.i = ill.mk(c.ill);
+let prevCol = null;
+function trailer(n, title, tag, col, d, ill) {
+  const pc = prevCol, last = /^Et bien/.test(title); prevCol = col;
+  SCENES.push({ d, m: "color",
+    mk() { const c = { bg: E(WHITE) }; if (pc) c.pan0 = E(`<div class="v-pan" style="background:${pc}"></div>`);
+      c.pan = E(`<div class="v-pan" style="background:${col}"></div>`); c.ill = E("", "ill"); c.i = ill.mk(c.ill);
       const fin = /…$/.test(title) ? "" : `<span style="color:#F0997B">.</span>`;
       c.t = E(`<div class="v-h" style="font-size:100px;width:700px;white-space:normal;line-height:1">${title}${fin}</div>`); c.g = E(`<div class="v-tag">${tag}</div>`); return c; },
-    up(c, t) { const pin = ex(k(t, 0, .5)), out = k(t, 3.85, 4.2), o = 1 - out;
-      P(c.bg, 800, 450); P(c.pan, lerp(-380, 430, pin), 450, { o });
-      P(c.ill, lerp(-380, 430, pin), 450, { o }); ill.up(c.i, t);
-      const pt = eo(k(t, .1, .65)); P(c.t, 1180 + 160 * (1 - pt), 400, { o: pt * o });
-      P(c.g, 1180, 640, { o: k(t, .5, .9) * o }); } });
+    up(c, t) { const first = !pc, pin = first ? ex(k(t, 0, .5)) : 1, px = lerp(-380, 430, pin);
+      const out = k(t, d - (last ? .35 : .25), d), oc = last ? 1 - out : 1 - out * out, op = last ? 1 - out : 1;
+      const cin = ex(k(t, 0, .4)), iin = ex(k(t, .1, .5));
+      P(c.bg, 800, 450);
+      if (c.pan0) P(c.pan0, px, 450, { o: op });
+      P(c.pan, px, 450, { o: (first ? 1 : cin) * op });
+      P(c.ill, px, 450, { o: (first ? 1 : iin) * oc, s: first ? 1 : lerp(.92, 1, iin) }); ill.up(c.i, t);
+      const pt = eo(k(t, .1, .65)); P(c.t, 1180 + 160 * (1 - pt), 400, { o: pt * oc });
+      P(c.g, 1180, 640, { o: k(t, .5, .9) * oc }); } });
 }
-trailer("01", "Minecraft", "Construire ensemble.\nRésoudre des défis.\nApprendre en jouant.", "#DCF1E4", {
+trailer("01", "Minecraft", "Construire ensemble.\nRésoudre des défis.\nApprendre en jouant.", "#DCF1E4", 4.2, {
   mk(box) { const L = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [0, 0, 2]];
     const draw = L.map((p, i) => ({ p, i })).sort((a, b) => (a.p[0] + a.p[1] + a.p[2]) - (b.p[0] + b.p[1] + b.p[2]) || a.p[2] - b.p[2]);
     const cols = [["#97C459", "#BA7517", "#8F5A14"], ["#CDD5DF", "#AAB4C0", "#8C97A5"], ["#9FE1CB", "#5DCAA5", "#1D9E75"]];
     const c = { cubes: [] }; draw.forEach(({ p, i }) => { const cc = cols[i === 7 ? 2 : (i === 3 || i === 5) ? 1 : 0]; c.cubes.push({ el: E(cube(...cc), "", box), p, i }); }); return c; },
   up(c, t) { c.cubes.forEach(({ el, p, i }) => { const a = .3 + i * .3, q = eo(k(t, a, a + .4)); const x = 300 + (p[0] - p[1]) * 60, y = 330 + (p[0] + p[1]) * 34 - p[2] * 70;
     P(el, x, lerp(y - 260, y, q), { o: k(t, a, a + .15) }); }); } });
-trailer("02", "Robotique", "Programmer un robot.\nTester, se tromper,\nrecommencer !", "#DCE9FB", {
+trailer("02", "Robotique", "Programmer un robot.\nTester, se tromper,\nrecommencer !", "#DCE9FB", 4.0, {
   mk(box) { const c = {}; c.g = E(`<div class="v-grille"></div>`, "", box);
     c.path = [[0, 3], [0, 1], [2, 1], [2, 0], [3, 0]]; c.dots = [];
     for (let i = 0; i < 9; i++) c.dots.push(E("", "v-pt", box)); c.star = E(STAR(90), "", box); c.r = E(ROBOT, "", box); return c; },
-  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .4, 3.2) * segs;
+  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .4, 2.8) * segs;
     const sI = Math.min(segs - 1, Math.floor(p)), f = eo(p - sI), A = c.path[sI], B = c.path[sI + 1];
     P(c.r, lerp(cx(A[0]), cx(B[0]), f), lerp(cx(A[1]), cx(B[1]), f), { r: Math.sin(t * 8) * 3 });
     c.dots.forEach((d, i) => { const q = i / 8 * segs; const j = Math.min(segs - 1, Math.floor(q)), g = q - j, a = c.path[j], b = c.path[j + 1];
       P(d, lerp(cx(a[0]), cx(b[0]), g), lerp(cx(a[1]), cx(b[1]), g), { o: q < p - .15 ? 1 : 0 }); });
-    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 3.2, 3.8)), r: 12 * Math.sin(t * 2) }); } });
-trailer("03", "Intelligence collective", "Penser à plusieurs\nsur un même tableau\n(Freeform).", "#FAF0C8", {
+    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 2.8, 3.4)), r: 12 * Math.sin(t * 2) }); } });
+trailer("03", "Intelligence collective", "Penser à plusieurs.\nPartager ses idées.\nChaque idée compte.", "#FAF0C8", 3.6, {
   mk(box) { const N = [[150, 150, "#FAF0C8", "Idée !"], [440, 130, "#FADDE3", "Et si… ?"], [300, 320, "#DCE9FB", "On essaie ?"], [150, 470, "#DCF1E4", "Moi aussi !"], [450, 470, "#FDE5D3", "Bravo !"]];
     const Ls = [[0, 2], [1, 2], [2, 3], [2, 4], [0, 1]];
     const c = { N }; c.board = E(`<div class="v-board"></div>`, "", box);
     c.svg = E(sv("0 0 600 600", 600, 600, Ls.map(([a, b]) => `<line x1="${N[a][0]}" y1="${N[a][1]}" x2="${N[b][0]}" y2="${N[b][1]}" stroke="#737373" stroke-width="5" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400"/>`).join("")), "", box);
     c.lines = [...c.svg.querySelectorAll("line")]; c.notes = N.map(n => E(`<div class="v-note" style="background:${n[2]}">${n[3]}</div>`, "", box)); return c; },
   up(c, t) { P(c.board, 300, 300); P(c.svg, 300, 300);
-    c.notes.forEach((el, i) => { const a = .3 + i * .3, q = eo(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1] + 30 * (1 - q), { o: q, r: i % 2 ? 3 : -3 }); });
+    c.notes.forEach((el, i) => { const a = .3 + i * .25, q = eo(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1] + 30 * (1 - q), { o: q, r: i % 2 ? 3 : -3 }); });
     c.lines.forEach((l, i) => l.setAttribute("stroke-dashoffset", 400 * (1 - eo(k(t, 1.9 + i * .2, 2.5 + i * .2))))); } });
-trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", "#E7E0FA", {
+trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", "#E7E0FA", 3.4, {
   mk(box) { const c = {}; c.p = E(`<div class="v-poster"></div>`, "", box);
     c.parts = [`<div style="width:300px;height:80px;border-radius:16px;background:#AFA9EC"></div>`, `<div style="width:170px;height:170px;border-radius:50%;background:#9FE1CB"></div>`,
       STAR(110), `<div style="width:280px;height:26px;border-radius:13px;background:#0a0a0a"></div>`, `<div style="width:200px;height:26px;border-radius:13px;background:#DCDCDC"></div>`].map(h => E(h, "", box));
@@ -991,15 +1005,15 @@ trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son ta
     c.parts.forEach((el, i) => { const a = .5 + i * .45, q = eo(k(t, a, a + .35)); P(el, pos[i][0], pos[i][1], { s: lerp(.6, 1, q), o: q, r: -2 }); });
     c.sw.forEach((el, i) => P(el, 545, 140 + i * 100, { o: k(t, .2 + i * .1, .5 + i * .1) }));
     const hp = (t * 1.1) % 1, step = Math.floor(t * 1.1) % 4; P(c.hand, lerp(560, 300, eo(hp)), lerp(160 + step * 100, 330, eo(hp)), { o: t < 3.7 ? 1 : 0 }); } });
-trailer("05", "Réalisation de vidéos", "Écrire, filmer, monter :\nraconter ses histoires.", "#FADDE3", {
+trailer("05", "Réalisation de vidéos", "Écrire, filmer, monter :\nraconter ses histoires.", "#FADDE3", 3.4, {
   mk(box) { const c = {}; c.c = E(CLAP, "", box); c.arm = c.c.querySelector(".arm"); c.act = E(`<div class="v-h" style="font-size:90px"><span class="v-mk">Action !</span></div>`, "", box);
     c.rec = E(`<div class="v-rec"><i></i>REC</div>`, "", box); return c; },
   up(c, t) { P(c.c, 300, 340, { r: -3 }); const close = eo(k(t, .6, .85)); c.arm.setAttribute("transform", `rotate(${lerp(-26, 0, close)} 30 76)`);
     P(c.act, 300, 95, { o: k(t, .9, 1.2), s: lerp(.9, 1, eo(k(t, .9, 1.3))) });
     c.rec.querySelector("i").style.opacity = .35 + .65 * Math.abs(Math.cos(t * 3)); P(c.rec, 300, 545, { o: k(t, 1.3, 1.6) }); } });
-trailer("06", "Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux pour apprendre…", "#FDE5D3", {
+trailer("06", "Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux pour apprendre…", "#FDE5D3", 3.6, {
   mk(box) { return { e: [["film", "#FDE5D3"], ["mic", "#DCE9FB"], ["book", "#FAF0C8"], ["gamepad", "#E7E0FA"], ["globe", "#DCF1E4"]].map(([n, col]) => E(`<div class="v-big"><div style="width:230px;height:230px;border-radius:50%;background:${col};display:grid;place-items:center">${ICO(n, 170)}</div></div>`, "", box)) }; },
-  up(c, t) { c.e.forEach((el, j) => { const a = .2 + j * .72, q = eo(k(t, a, a + .3)), z = j < 4 ? k(t, a + .62, a + .78) : 0;
+  up(c, t) { c.e.forEach((el, j) => { const a = .2 + j * .6, q = eo(k(t, a, a + .3)), z = j < 4 ? k(t, a + .5, a + .66) : 0;
     P(el, 300 - 60 * z, 300, { s: lerp(.85, 1, q), o: q * (1 - z), r: lerp(-4, 0, q) }); }); } });
 
 SCENES.push({ d: 8, m: "color",

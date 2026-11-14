@@ -220,8 +220,9 @@ html.aimant #titre{animation:none}
 .endmenu .btn{margin:0;align-self:auto}
 
 /* ---- Vidéo : éléments de la scène (coordonnées 1600 × 900) ---- */
-#stage svg{overflow:visible}
-#stage .a{position:absolute;left:0;top:0;transform-origin:center center}
+#stage svg,#stage-prev svg{overflow:visible}
+#stage-prev{position:absolute;left:0;top:0;width:1600px;height:900px;transform-origin:0 0;overflow:hidden;pointer-events:none;font-family:var(--font);color:var(--ink)}
+#stage .a,#stage-prev .a{position:absolute;left:0;top:0;transform-origin:center center}
 .full{width:1600px;height:900px}
 .inter{width:1600px;height:900px;background:#0d0b08;display:grid;place-items:center}
 .inter .frame{width:1300px;min-height:640px;border:6px double #e9dfc8;outline:2px solid #e9dfc8;outline-offset:16px;display:flex;flex-direction:column;
@@ -250,13 +251,18 @@ html.aimant #titre{animation:none}
 .v-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-content:center}
 .v-app{aspect-ratio:1;border-radius:26px;display:grid;place-items:center}
 .v-bulle{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;border:4px solid #fff;box-shadow:0 14px 34px rgba(10,10,10,.08)}
-.v-card{width:420px;height:500px;background:#fff;border:2px solid #ececec;border-radius:36px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .3s}
+.v-card{width:460px;height:540px;background:#fff;border:2px solid #ececec;border-radius:36px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .3s}
 .v-card.on{border-color:#0a0a0a}
-.v-art{height:230px;display:grid;place-items:center}
+.v-art{height:200px;display:grid;place-items:center}
 .v-body{flex:1;padding:28px 34px;display:flex;flex-direction:column;gap:16px}
-.v-num{font-family:var(--mono);font-size:32px;letter-spacing:.1em;color:#737373}
-.v-t{font-size:42px;font-weight:600;line-height:1.12;letter-spacing:-.03em;color:#0a0a0a}
+.v-num{font-family:var(--mono);font-size:38px;letter-spacing:.1em;color:#737373}
+.v-t{font-size:50px;font-weight:600;line-height:1.1;letter-spacing:-.03em;color:#0a0a0a}
 .v-pan{width:640px;height:640px;border-radius:56px}
+.v-morph{box-sizing:border-box}
+.mal{width:500px;height:400px;position:relative;transform-origin:50% 100%}.mal>*{position:absolute;left:0;top:0}
+.mal-3d{width:500px;height:400px;perspective:1100px;perspective-origin:50% 45%}
+.mal-lid{position:absolute;left:10px;top:30px;width:480px;height:120px;transform-origin:50% 0;transform-style:preserve-3d}
+.mal-lid svg{position:absolute;left:0;top:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}.mal-lid .in{transform:rotateX(180deg)}
 .v-tag{width:700px;font-size:44px;line-height:1.3;color:#3c3c3c;white-space:pre-line;letter-spacing:-.015em}
 .v-cur{display:inline-block;width:12px;height:.82em;margin-left:10px;border-radius:4px;background:#F0997B;vertical-align:-.04em}
 .ill{width:600px;height:600px}
@@ -356,8 +362,8 @@ html.aimant #titre{animation:none}
         </span>
         <span class="card-body">
           <h3>Une tablette pour chaque élève&nbsp;: ça change quoi&nbsp;?</h3>
-          <p>Un petit film de 2 minutes&nbsp;: l’école d’avant… puis l’école d’aujourd’hui.</p>
-          <ul class="tags"><li>Vidéo</li><li>2 minutes</li></ul>
+          <p>Un petit film d’une minute et demie&nbsp;: toute ta mallette… dans une tablette&nbsp;?</p>
+          <ul class="tags"><li>Vidéo</li><li>1 minute</li></ul>
           <span class="btn">Regarde le film <svg class="fleche" width="12" height="10" aria-hidden="true"><use href="#fl"/></svg></span>
         </span>
       </button></li>
@@ -642,7 +648,7 @@ $("qrClose").addEventListener("click", () => qrDlg.close());
 qrDlg.addEventListener("click", e => { if (e.target === qrDlg) qrDlg.close(); });
 /* =====================================================================
    VIDÉO « LE 1:1 AU CHÊNEUX » — animation image par image (12 images/s)
-   Partie 1 : film muet (l'école d'avant). Partie 2 : le 1:1.
+   Partie 1 : la mallette magique. Partie 2 : le 1:1.
    Partie 3 : bande-annonce. Tout est dessiné ici, sans fichier externe.
    ===================================================================== */
 const ST = $("stage"), FPS = 12;
@@ -674,7 +680,7 @@ const sv = (vb, w, h, inner) => `<svg viewBox="${vb}" width="${w}" height="${h}"
 /* ---------- Dessins ---------- */
 /* Personnages en ombres chinoises (silhouettes d'époque) */
 const TEACHER = sv("0 0 220 420", 220, 420, `
-  <g fill="#1a1a1a">
+  <g fill="#f3ead6" stroke="#3a3128" stroke-width="3.5" stroke-linejoin="round">
     <path d="M70 410 C58 410 44 412 38 416 C36 418 40 420 50 420 L96 420 L100 405 Z"/>
     <path d="M118 410 L132 405 L142 420 L178 420 C176 414 160 410 150 408 Z"/>
     <path d="M80 300 L92 405 L108 405 L112 300 Z"/>
@@ -688,7 +694,7 @@ const TEACHER = sv("0 0 220 420", 220, 420, `
     <path d="M118 30 C126 22 140 24 144 34 C148 44 142 52 134 54 Z"/>
     <path d="M86 130 C90 150 92 170 90 196 L74 198 C70 176 72 150 80 130 Z"/>
   </g>
-  <g fill="none" stroke="#d9cfbb" stroke-width="1.6" stroke-linecap="round" opacity=".75">
+  <g fill="none" stroke="#3a3128" stroke-width="1.6" stroke-linecap="round" opacity=".75">
     <path d="M95 112 C98 120 104 126 110 128 C116 124 120 118 121 112"/>
     <path d="M100 206 C98 250 90 300 82 350"/>
     <path d="M118 206 C120 260 126 320 138 390"/>
@@ -697,18 +703,18 @@ const TEACHER = sv("0 0 220 420", 220, 420, `
     <path d="M96 56 C104 48 118 46 126 54"/>
   </g>
   <g class="arm">
-    <g fill="#1a1a1a">
+    <g fill="#f3ead6" stroke="#3a3128" stroke-width="3.5" stroke-linejoin="round">
       <circle cx="70" cy="132" r="14"/>
       <path d="M58 130 C54 164 56 204 60 238 L80 238 C84 204 86 164 83 130 Z"/>
       <path d="M57 232 L84 232 L82 246 L59 246 Z"/>
       <path d="M62 244 C58 252 58 262 63 268 C66 272 70 270 71 266 C73 270 78 270 79 264 C82 260 82 252 80 244 Z"/>
       <path d="M78 246 C84 248 86 254 82 258 C80 256 79 252 78 250 Z"/>
     </g>
-    <path d="M64 142 C62 170 64 204 66 232" fill="none" stroke="#d9cfbb" stroke-width="1.5" opacity=".6"/>
+    <path d="M64 142 C62 170 64 204 66 232" fill="none" stroke="#3a3128" stroke-width="1.5" opacity=".6"/>
     <rect x="66" y="260" width="5" height="19" rx="1" fill="#fff"/>
   </g>`);
 const STUDENT = sv("0 0 420 380", 420, 380, `
-  <g fill="#1a1a1a">
+  <g fill="#f3ead6" stroke="#3a3128" stroke-width="3.5" stroke-linejoin="round">
     <path d="M196 188 L224 188 L226 214 C216 220 204 220 194 214 Z"/>
     <path d="M142 232 C148 212 170 204 196 202 C206 210 214 210 224 202 C250 204 272 212 278 232 L292 296 L128 296 Z"/>
     <path d="M128 252 C116 262 112 282 116 296 L150 296 L150 258 Z"/>
@@ -716,10 +722,10 @@ const STUDENT = sv("0 0 420 380", 420, 380, `
     <path d="M110 286 C120 274 150 270 176 280 C184 284 186 290 182 296 L112 296 Z"/>
     <path d="M310 286 C300 274 270 270 244 280 C236 284 234 290 238 296 L308 296 Z"/>
     <path d="M52 296 L52 268 C68 262 96 262 112 270 L112 296 Z"/>
-    <path d="M56 270 C72 266 94 266 108 272" stroke="#d9cfbb" stroke-width="1.5" fill="none"/>
+    <path d="M56 270 C72 266 94 266 108 272" stroke="#3a3128" stroke-width="1.5" fill="none"/>
     <path d="M340 296 L344 262 L352 262 L356 296 Z"/>
     <path d="M334 262 C336 252 360 252 362 262 Z"/>
-    <path d="M356 226 C348 238 346 248 348 260" stroke="#1a1a1a" stroke-width="3" fill="none"/>
+    <path d="M356 226 C348 238 346 248 348 260" stroke="#3a3128" stroke-width="3" fill="none"/>
     <path d="M356 224 L368 230 L358 240 Z"/>
     <path d="M16 292 C16 288 24 286 40 286 L380 286 C396 286 404 288 404 292 L412 306 C412 312 408 322 400 322 L20 322 C12 322 8 312 8 306 Z"/>
     <path d="M24 322 L396 322 L396 354 C380 350 340 350 316 354 L104 354 C80 350 40 350 24 354 Z"/>
@@ -728,29 +734,29 @@ const STUDENT = sv("0 0 420 380", 420, 380, `
     <path d="M58 356 L362 356 L362 366 L58 366 Z"/>
     <path d="M196 366 L224 366 L228 380 L192 380 Z"/>
   </g>
-  <g fill="#d9cfbb" opacity=".8">
+  <g fill="#3a3128" opacity=".45">
     <circle cx="70" cy="338" r="7"/><circle cx="140" cy="338" r="7"/><circle cx="210" cy="338" r="7"/><circle cx="280" cy="338" r="7"/><circle cx="350" cy="338" r="7"/>
     <path d="M30 296 L390 296 L390 298 L30 298 Z" opacity=".7"/>
   </g>
-  <path d="M196 204 L210 222 L224 204" fill="none" stroke="#d9cfbb" stroke-width="2" opacity=".8"/>
-  <path d="M184 288 C196 280 224 280 236 288" fill="none" stroke="#d9cfbb" stroke-width="1.5" opacity=".6"/>
+  <path d="M196 204 L210 222 L224 204" fill="none" stroke="#3a3128" stroke-width="2" opacity=".8"/>
+  <path d="M184 288 C196 280 224 280 236 288" fill="none" stroke="#3a3128" stroke-width="1.5" opacity=".6"/>
   <g class="head">
-    <g fill="#1a1a1a">
+    <g fill="#f3ead6" stroke="#3a3128" stroke-width="3.5" stroke-linejoin="round">
       <path d="M150 128 C142 124 134 130 136 142 C138 154 146 160 154 158 Z"/>
       <path d="M270 128 C278 124 286 130 284 142 C282 154 274 160 266 158 Z"/>
       <path d="M210 76 C174 76 150 98 150 134 C150 168 170 198 210 202 C250 198 270 168 270 134 C270 98 246 76 210 76 Z"/>
       <path d="M148 128 C142 96 160 66 196 62 C204 54 224 52 234 60 C262 66 280 98 272 128 C268 108 254 94 238 92 C220 100 188 100 170 90 C158 98 152 112 148 128 Z"/>
       <path d="M200 62 C198 48 212 40 226 46 C220 50 216 56 218 62 Z"/>
     </g>
-    <g fill="none" stroke="#d9cfbb" stroke-width="1.8" stroke-linecap="round" opacity=".85">
+    <g fill="none" stroke="#3a3128" stroke-width="1.8" stroke-linecap="round" opacity=".85">
       <path d="M170 92 C186 98 208 100 238 92"/>
       <path d="M210 150 C206 158 204 162 208 164 C212 165 214 163 212 160"/>
       <path d="M170 128 C174 118 184 118 198 124"/>
       <path d="M250 128 C246 118 236 118 222 124"/>
     </g>
-    <ellipse class="e1" cx="186" cy="146" rx="9" ry="9" fill="#d9cfbb"/>
-    <ellipse class="e2" cx="234" cy="146" rx="9" ry="9" fill="#d9cfbb"/>
-    <ellipse class="mouth" cx="210" cy="178" rx="12" ry="3" fill="#d9cfbb"/>
+    <ellipse class="e1" cx="186" cy="146" rx="7" ry="7" fill="#3a3128"/>
+    <ellipse class="e2" cx="234" cy="146" rx="7" ry="7" fill="#3a3128"/>
+    <ellipse class="mouth" cx="210" cy="178" rx="12" ry="3" fill="#3a3128"/>
   </g>`);
 const CLOCK = sv("0 0 200 200", 170, 170, `
   <g fill="#1a1a1a">
@@ -778,7 +784,7 @@ function studentRefs(el) { return { head: el.querySelector(".head"), mouth: el.q
 function yawn(r, t, a) { // bâillement entre a et a+1.6 s
   const y = Math.max(0, Math.sin(clamp((t - a) / 1.6) * Math.PI));
   r.mouth.setAttribute("ry", 3 + 22 * y); r.mouth.setAttribute("rx", 12 + 6 * y);
-  const lid = 9 - 7 * Math.max(y, k(t, a + 1.6, a + 2.4));
+  const lid = 7 - 5.5 * Math.max(y, k(t, a + 1.6, a + 2.4));
   r.e1.setAttribute("ry", lid); r.e2.setAttribute("ry", lid);
 }
 
@@ -786,51 +792,6 @@ const SCENES = [];
 const CHAPTERS = [];
 function chap(nom) { CHAPTERS.push({ nom, at: SCENES.reduce((s, x) => s + x.d, 0) }); }
 
-/* ===== Partie 1 : le film muet ===== */
-chap("Le film muet");
-SCENES.push({ d: 4.5, m: "muet", fixe: true,
-  mk() { const c = {}; c.f = E(`<div class="frame"><div class="s">Les Films du Chêneux présentent</div><div class="xl">L’ÉCOLE D’AVANT</div><div class="s" style="font-size:34px">un film muet… comme la classe</div></div>`, "inter");
-    c.iris = E("", ""); c.iris.style.cssText = "border-radius:50%;box-shadow:0 0 0 1800px #000;"; return c; },
-  up(c, t) { P(c.f, 800, 450, { b: 0, o: 1 - k(t, 4.2, 4.5) }); const R = lerp(0, 2000, eo(k(t, 0, 1.2))); c.iris.style.width = c.iris.style.height = R + "px"; P(c.iris, 800, 450, { b: 0 }); } });
-SCENES.push(inter(`<div class="l">Leçon 1 : recopier.<br>Leçon 2 : recopier.<br>Leçon 3 : devinez…</div>`, 3.4));
-SCENES.push({ d: 5.5, m: "muet",
-  mk() { const c = { bg: wall() }; c.board = E(`<div class="boardbox"><div class="chalk"></div></div>`); c.ch = c.board.querySelector(".chalk");
-    c.clock = E(CLOCK); c.tc = E(TEACHER); c.arm = c.tc.querySelector(".arm"); c.st = E(STUDENT); c.r = studentRefs(c.st);
-    c.hh = c.clock.querySelector(".hh"); c.mm = c.clock.querySelector(".mm"); c.ss = c.clock.querySelector(".ss"); return c; },
-  up(c, t) {
-    P(c.bg, 800, 450, { b: 0 }); P(c.board, 520, 290, { b: .4 }); P(c.clock, 1340, 150, { b: .4 });
-    const txt = "Je recopie la leçon.\nJe recopie la leçon.\nJe recopie la leçon.\nJe recopie la le…";
-    const n = Math.floor(t * 15); c.ch.textContent = txt.slice(0, n);
-    const line = Math.min(3, Math.floor(n / 21));
-    P(c.tc, 960 + (n % 21) * 2, 520 + line * 6, { b: .8 }); c.arm.setAttribute("transform", `rotate(${128 + 10 * Math.sin(t * 22) - line * 6} 70 132)`);
-    c.ss.setAttribute("transform", `rotate(${Math.floor(t * 2) * 6} 100 100)`); c.mm.setAttribute("transform", `rotate(${170 + Math.floor(t) * 1} 100 100)`); c.hh.setAttribute("transform", "rotate(250 100 100)");
-    P(c.st, 1240, 700, { b: .8 }); yawn(c.r, t, 1.4);
-    c.r.head.setAttribute("transform", `rotate(${22 * eo(k(t, 3.8, 4.6))} 210 200) translate(0 ${30 * eo(k(t, 3.8, 4.6))})`);
-  } });
-SCENES.push(inter(`<div class="l">Pour changer un peu…</div><div class="xl" style="font-size:96px">des photocopies.</div>`, 2.6));
-SCENES.push({ d: 4.8, m: "muet",
-  mk() { const c = { bg: wall() }; c.st = E(STUDENT); c.r = studentRefs(c.st); c.sh = [];
-    for (let i = 0; i < 26; i++) c.sh.push({ el: E("", "sheet"), r: jr(4), x: jr(10) });
-    c.clock = E(CLOCK); c.ss = c.clock.querySelector(".ss"); c.label = E(`<div class="zz" style="font-size:52px">« Et une feuille de plus ! »</div>`); return c; },
-  up(c, t) {
-    P(c.bg, 800, 450, { b: 0 }); P(c.st, 800, 640, { b: .8 }); P(c.clock, 1340, 150, { b: .4 });
-    c.ss.setAttribute("transform", `rotate(${Math.floor(t * 2) * 6} 100 100)`);
-    c.r.e1.setAttribute("cx", 186 + 6 * Math.sin(t * 6)); c.r.e2.setAttribute("cx", 234 + 6 * Math.sin(t * 6));
-    c.sh.forEach((s, i) => { const a = .15 + i * .15, p = k(t, a, a + .3); const y = lerp(-60, 668 - i * 21, p * p);
-      P(s.el, 800 + s.x, y, { r: p < 1 ? 25 * (1 - p) + s.r : s.r, o: t > a ? 1 : 0, b: .5 }); });
-    P(c.label, 330, 120, { o: k(t, 1, 1.3), r: -4, b: .6 });
-  } });
-SCENES.push(inter(`<div class="l">Même leçon. Même rythme.<br>Pour tout le monde.</div>`, 3.0));
-SCENES.push({ d: 4.8, m: "muet",
-  mk() { const c = { bg: wall(), s: [], z: [] }; for (let i = 0; i < 5; i++) { const el = E(STUDENT); el.style.width = "420px"; c.s.push({ el, r: studentRefs(el) }); }
-    for (let i = 0; i < 5; i++) c.z.push(E(`<div class="zz">Z z z</div>`)); return c; },
-  up(c, t) {
-    P(c.bg, 800, 450, { b: 0 });
-    c.s.forEach((s, i) => { P(s.el, 180 + i * 310, 610, { s: .66, b: .6 }); yawn(s.r, t, .6);
-      s.r.head.setAttribute("transform", `rotate(${(i % 2 ? -1 : 1) * 26 * eo(k(t, 2.6, 3.2))} 210 200) translate(0 ${34 * eo(k(t, 2.6, 3.2))})`); });
-    c.z.forEach((z, i) => { const p = k(t, 3.1 + i * .08, 4.8); P(z, 180 + i * 310 + 40 * p, 470 - 160 * p, { o: p > 0 ? 1 - p * .6 : 0, s: .8 + .5 * p, b: .6 }); });
-  } });
-SCENES.push(inter(`<div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div>`, 2.6));
 
 /* =====================================================================
    PARTIE MODERNE — style de la vitrine : blanc, Figtree, pastels.
@@ -878,160 +839,238 @@ function confetti(n, x0, y0) { return Array.from({ length: n }, (_, i) => ({ el:
 function confUp(list, t, a) { list.forEach(f => { const s = t - a; if (s < 0) { f.el.style.opacity = 0; return; }
   P(f.el, f.x0 + f.vx * s, f.y0 + f.vy * s + 800 * s * s, { r: f.r * s, o: 1 - k(s, 1.4, 2) }); }); }
 
-/* Passage du film muet à aujourd'hui : un rond blanc s'ouvre, calmement */
-SCENES.push({ d: 1.6, m: "color",
-  mk() { const c = {}; c.f = E(`<div class="frame"><div class="xl" style="font-size:130px">Et si on changeait<br>de film ?</div></div>`, "inter sepia");
-    c.iris = E(`<div style="width:200px;height:200px;border-radius:50%;background:#fff"></div>`);
-    c.dot = E(`<div style="width:56px;height:56px;border-radius:50%;background:#F0997B"></div>`); return c; },
-  up(c, t) { P(c.f, 800, 450);
-    const p = ex(k(t, .15, .7)); P(c.iris, 800, 450, { s: p * 10.5, o: t > .15 ? 1 : 0 });
-    P(c.dot, 800, 420, { s: pop(t, .6, .4) * (1 - eo(k(t, 1.4, 1.6))), o: t > .6 ? 1 : 0 }); } });
+/* Courbe douce au départ et à l'arrivée (poussée latérale, morph) */
+const REDUIT_V = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const io = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const mixCol = (a, b, p) => `rgb(${a.map((v, i) => Math.round(lerp(v, b[i], p))).join(",")})`;
+
+/* ===== Partie 1 : la mallette magique ===== */
+chap("La mallette");
+/* Mallette dessinée en deux couches : l'arrière (intérieur, couvercle à charnière, anse)
+   et l'avant (corps, coutures, fermoirs dorés). Les objets passent entre les deux. */
+const MAL_ARR = `<div class="mal">
+  <svg viewBox="0 0 500 400" width="500" height="400"><path d="M10 150 L10 70 Q10 30 50 30 L450 30 Q490 30 490 70 L490 150 Z" fill="#EDBE9F" stroke="#0a0a0a" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M40 150 L40 92 Q40 62 70 62 L430 62 Q460 62 460 92 L460 150 Z" fill="#E2AB89" opacity=".6"/></svg>
+  <div class="mal-3d"><div class="mal-lid">
+    <svg class="out" viewBox="0 0 480 120" width="480" height="120"><path d="M0 120 L0 40 Q0 0 40 0 L440 0 Q480 0 480 40 L480 120 Z" fill="#FDE5D3" stroke="#0a0a0a" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M26 110 L26 46 Q26 26 46 26 L434 26 Q454 26 454 46 L454 110" fill="none" stroke="#0a0a0a" stroke-opacity=".32" stroke-width="4" stroke-dasharray="1 13" stroke-linecap="round"/>
+      <path d="M48 52 L150 52" stroke="#fff" stroke-opacity=".75" stroke-width="8" stroke-linecap="round"/></svg>
+    <svg class="in" viewBox="0 0 480 120" width="480" height="120"><path d="M0 120 L0 40 Q0 0 40 0 L440 0 Q480 0 480 40 L480 120 Z" fill="#F6CDB3" stroke="#0a0a0a" stroke-width="7" stroke-linejoin="round"/>
+      <path d="M26 110 L26 46 Q26 26 46 26 L434 26 Q454 26 454 46 L454 110" fill="none" stroke="#0a0a0a" stroke-opacity=".25" stroke-width="4" stroke-dasharray="1 13" stroke-linecap="round"/></svg>
+  </div></div>
+  <svg viewBox="0 0 500 400" width="500" height="400"><path d="M192 34 L192 8 C192 -40 308 -40 308 8 L308 34" fill="none" stroke="#0a0a0a" stroke-width="30" stroke-linecap="round"/>
+    <path d="M192 34 L192 8 C192 -40 308 -40 308 8 L308 34" fill="none" stroke="#F6CDB3" stroke-width="15" stroke-linecap="round"/>
+    <rect x="174" y="22" width="36" height="18" rx="7" fill="#FAC775" stroke="#0a0a0a" stroke-width="5"/><rect x="290" y="22" width="36" height="18" rx="7" fill="#FAC775" stroke="#0a0a0a" stroke-width="5"/></svg>
+</div>`;
+const FERMOIR = x => `<rect x="${x - 27}" y="148" width="54" height="28" rx="9" fill="#FAC775" stroke="#0a0a0a" stroke-width="6"/>
+  <g class="lat"><rect x="${x - 21}" y="104" width="42" height="54" rx="11" fill="#FAC775" stroke="#0a0a0a" stroke-width="6"/>
+  <circle cx="${x}" cy="140" r="5.5" fill="#0a0a0a"/><path d="M${x - 10} 116 L${x - 10} 128" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".85"/></g>`;
+const MAL_AV = `<div class="mal"><svg viewBox="0 0 500 400" width="500" height="400">
+  <rect x="62" y="372" width="74" height="24" rx="12" fill="#0a0a0a"/><rect x="364" y="372" width="74" height="24" rx="12" fill="#0a0a0a"/>
+  <path d="M10 146 L490 146 L490 340 Q490 382 448 382 L52 382 Q10 382 10 340 Z" fill="#FDE5D3" stroke="#0a0a0a" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M36 172 L464 172 L464 334 Q464 356 442 356 L58 356 Q36 356 36 334 Z" fill="none" stroke="#0a0a0a" stroke-opacity=".32" stroke-width="4" stroke-dasharray="1 13" stroke-linecap="round"/>
+  <path d="M58 206 L58 300" stroke="#fff" stroke-opacity=".75" stroke-width="9" stroke-linecap="round"/>
+  ${FERMOIR(140)}${FERMOIR(360)}</svg></div>`;
+const OMBRE = `<div style="width:540px;height:64px;border-radius:50%;background:radial-gradient(closest-side,rgba(10,10,10,.17),rgba(10,10,10,0))"></div>`;
+const MALLETTE_OBJ = [["book", "#FDE5D3"], ["pencil", "#FAF0C8"], ["numbers", "#DCE9FB"], ["globe", "#DCF1E4"], ["palette", "#FADDE3"], ["clap", "#E7E0FA"], ["mic", "#D3EFEC"], ["cube", "#FDE5D3"]];
+/* Où se posent les objets sortis : un arc au-dessus de la mallette */
+const ARC = [200, 228, 256, 284, 312, 340].map(a => [800 + 560 * Math.cos(a * Math.PI / 180), 590 + 300 * Math.sin(a * Math.PI / 180)]);
+SCENES.push({ d: 11, m: "color",
+  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
+    c.t1 = E(`<div class="v-h" style="font-size:96px">Que cache cette mallette<span style="color:#F0997B"> ?</span></div>`);
+    c.t2 = E(`<div class="v-h" style="font-size:96px">Tout ça… dans une <span class="v-mk">tablette</span><span style="color:#F0997B"> ?</span></div>`);
+    c.ip = E(IPAD(MALLETTE_OBJ)); c.apps = [...c.ip.querySelectorAll(".v-app")];
+    c.om = E(OMBRE); c.arr = E(MAL_ARR); c.lid = c.arr.querySelector(".mal-lid");
+    c.o = MALLETTE_OBJ.slice(0, 6).map(([n, col]) => E(`<div style="width:140px;height:140px;border-radius:50%;background:${col};display:grid;place-items:center;box-shadow:0 12px 30px rgba(10,10,10,.08)">${ICO(n, 84)}</div>`));
+    c.av = E(MAL_AV); c.lat = [...c.av.querySelectorAll(".lat")];
+    return c; },
+  up(c, t) {
+    P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .8));
+    /* Où arrivent les objets : le centre de chaque case de l'iPad (mesuré une fois) */
+    if (!c.pos) { P(c.ip, 800, 500, { s: 1.15 }); const r = ST.getBoundingClientRect();
+      c.pos = c.apps.map(a => { const b = a.getBoundingClientRect(); return [(b.left + b.width / 2 - r.left) / SCALE, (b.top + b.height / 2 - r.top) / SCALE, b.width / SCALE]; }); }
+    P(c.t1, 800, 105 + 30 * (1 - eo(k(t, .1, .6))), { o: eo(k(t, .1, .6)) * (1 - k(t, 4.9, 5.2)) });
+    /* 1. La mallette tombe (accélère), s'écrase un peu, rebondit */
+    const fp = k(t, 0, .55), land = k(t, .55, 1.05), out = k(t, 4.9, 5.5);
+    const y = lerp(-320, 560, fp * fp) - 26 * Math.sin(Math.PI * k(t, .7, 1.05)) + 300 * out * out;
+    const sq = .13 * Math.sin(Math.PI * k(t, .55, .8)) - .04 * Math.sin(Math.PI * k(t, 1.05, 1.25)) + .03 * Math.sin(Math.PI * k(t, 1.05, 1.22));
+    const ant = .035 * Math.sin(Math.PI * k(t, 1.1, 1.35)); /* petit recul avant l'ouverture */
+    [c.arr, c.av].forEach(el => { P(el, 800, y, { o: 1 - out, s: 1.08 }); el.firstChild.style.transform = `scale(${1 + sq + ant * .5},${1 - sq - ant})`; });
+    P(c.om, 800, 786, { s: 1.08 * lerp(.35, 1, fp * fp) - .1 * Math.sin(Math.PI * k(t, .7, 1.05)), o: (1 - out) * k(t, 0, .3) });
+    /* 2. Les fermoirs sautent, le couvercle s'ouvre sur sa charnière */
+    c.lat.forEach((l, j) => { const q = bk(k(t, 1.2 + j * .08, 1.45 + j * .08)); const x = j ? 339 : 119;
+      l.setAttribute("transform", `translate(0 ${-10 * q}) rotate(${-22 * q} ${x} 104)`); });
+    c.lid.style.transform = `rotateX(${-150 * bk(k(t, 1.45, 2.2))}deg)`;
+    /* 3. Les objets sortent en arc (100 ms d'écart), flottent, puis 4. volent jusque dans l'iPad */
+    const ip = ex(k(t, 5.0, 5.7)); P(c.ip, 800, lerp(1250, 500, ip), { s: 1.15 });
+    c.o.forEach((el, j) => {
+      const a = 1.95 + j * .1, p = eo(k(t, a, a + .75)), [X, Y] = ARC[j], CX = (800 + X) / 2, CY = Math.min(Y, 560) - 110;
+      const bx = (1 - p) * (1 - p) * 800 + 2 * (1 - p) * p * CX + p * p * X, by = (1 - p) * (1 - p) * 590 + 2 * (1 - p) * p * CY + p * p * Y;
+      const fl = 9 * Math.sin(t * 2.2 + j) * k(t, a + .75, a + 1.1);
+      const b = 5.6 + j * .12, f = eo(k(t, b, b + .5)), [tx, ty, tw] = c.pos[j];
+      P(el, lerp(bx, tx, f), lerp(by + fl, ty, f) - 80 * Math.sin(Math.PI * f), { s: lerp(lerp(.45, 1, bk(k(t, a, a + .75))), tw / 140, f), o: t > a ? (f < 1 ? 1 : 0) : 0, r: 8 * Math.sin(t * 2 + j) * (1 - f) * p }); });
+    c.apps.forEach((a, j) => { const at = j < 6 ? 6.1 + j * .12 : 6.9 + (j - 6) * .15, q = j < 6 ? (t >= at ? 1 : 0) : bk(k(t, at, at + .4));
+      a.style.opacity = q; a.style.transform = `scale(${j < 6 ? 1 + .12 * Math.sin(Math.PI * k(t, at, at + .3)) : q})`; });
+    P(c.t2, 800, 105 + 30 * (1 - eo(k(t, 7.2, 7.7))), { o: eo(k(t, 7.2, 7.7)) }); } });
 
 /* ===== Partie 2 : le 1:1 ===== */
 chap("Le 1:1");
-SCENES.push({ d: 5.2, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
-    c.m = E(`<div style="width:600px;height:110px;border-radius:14px;background:#FDE5D3"></div>`);
-    c.a = E(`<div class="v-h" style="font-size:360px">1</div>`); c.col = E(`<div class="v-h" style="font-size:360px;color:#F0997B">:</div>`); c.b = E(`<div class="v-h" style="font-size:360px">1</div>`);
-    c.q = E(SUB(`C’est quoi ?`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .8));
-    const st = (el, x, a) => { const p = eo(k(t, a, a + .6)); P(el, x, 420 + 70 * (1 - p), { o: p }); };
-    st(c.a, 610, .2); st(c.col, 800, .45); st(c.b, 990, .7);
-    const w = eo(k(t, 1.2, 1.9)); P(c.m, 800, 520, { o: w > 0 ? 1 : 0 }); c.m.firstChild.style.width = (600 * w) + "px";
-    P(c.q, 800, 745, { s: 1.25 }); subUp(c.q, t, 2.2); } });
-
+/* Une seule scène qui évolue : « 1:1 » s'écrit, monte et rétrécit, « C'est quoi ? » arrive,
+   puis le surlignage pêche devient l'iPad (morph). */
 const TUILES = [["book", "#FDE5D3"], ["pencil", "#FAF0C8"], ["palette", "#FADDE3"], ["clap", "#DCE9FB"], ["cube", "#DCF1E4"], ["robot", "#E7E0FA"], ["mic", "#D3EFEC"], ["globe", "#FDE5D3"]];
-SCENES.push({ d: 6, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds(); c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
-    c.cap = E(SUB(`Au Chêneux, chaque élève a [sa tablette] : un iPad.`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t);
-    const p = ex(k(t, 0, .9)); P(c.ip, 800, lerp(1250, 360, p), { s: 1.12, r: lerp(6, 0, p) });
-    c.apps.forEach((a, i) => { const q = eo(k(t, 1 + i * .14, 1.45 + i * .14)); a.style.transform = `scale(${q})`; a.style.opacity = q; });
-    P(c.cap, 800, 790); subUp(c.cap, t, 2.2); } });
+SCENES.push({ d: 11.5, m: "color",
+  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
+    c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
+    c.m = E(`<div class="v-morph"></div>`);
+    c.a = E(`<div class="v-h" style="font-size:360px">1</div>`); c.col = E(`<div class="v-h" style="font-size:360px;color:#F0997B">:</div>`); c.b = E(`<div class="v-h" style="font-size:360px">1</div>`);
+    c.q = E(SUB(`C’est quoi ?`)); c.cap = E(SUB(`Au Chêneux, chaque élève a [sa tablette] : un iPad.`)); return c; },
+  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .6));
+    const g = io(k(t, 3.0, 3.8)), S = lerp(1, .42, g), Y = lerp(420, 140, g);
+    const st = (el, x, a) => { const p = eo(k(t, a, a + .6)); P(el, 800 + (x - 800) * S, Y + 70 * (1 - p) * S, { o: p, s: S }); };
+    st(c.a, 610, 0); st(c.col, 800, .25); st(c.b, 990, .5);
+    /* Le surlignage : se dessine, suit le 1:1, puis devient l'iPad */
+    const w = eo(k(t, .9, 1.6)), m = io(k(t, 6.0, 7.0)), done = t >= 7.0;
+    const mf = c.m.firstChild;
+    mf.style.width = lerp(600 * w, 560, m) + "px"; mf.style.height = lerp(110, 420, m) + "px"; mf.style.borderRadius = lerp(14, 54, m) + "px";
+    /* Le pêche s'éclaircit en écran blanc pendant que le cadre noir de l'iPad pousse autour */
+    mf.style.background = mixCol([253, 229, 211], [255, 255, 255], k(m, .45, 1)); mf.style.border = `${22 * eo(k(m, .2, .85))}px solid #0a0a0a`;
+    mf.style.boxShadow = `0 30px 70px rgba(10,10,10,${.14 * m})`;
+    P(c.m, 800, lerp(Y + 100 * S, 470, m), { s: lerp(S, 1, m), o: w > 0 && !done ? 1 : 0 });
+    P(c.ip, 800, 470, { o: done ? 1 : 0 });
+    c.apps.forEach((a, i) => { const q = bk(k(t, 7.0 + i * .1, 7.4 + i * .1)); a.style.transform = `scale(${q})`; a.style.opacity = k(t, 7.0 + i * .1, 7.2 + i * .1); });
+    const qo = 1 - k(t, 5.85, 6.15); P(c.q, 800, 470 - 30 * k(t, 5.85, 6.15), { s: 1.5 }); subUp(c.q, t, 3.4, qo);
+    P(c.cap, 800, 790); subUp(c.cap, t, 7.3); } });
 
 const BULLES = ["book", "bulb", "pencil", "numbers", "globe", "speech"];
-SCENES.push({ d: 5.8, m: "color",
+SCENES.push({ d: 6.2, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.title = E(`<div class="v-h" style="font-size:104px">Un outil pour <span class="v-mk">apprendre</span>.</div>`);
     c.ip = E(IPAD(TUILES)); c.b = BULLES.map((n, i) => E(`<div class="v-bulle" style="background:${PAS[i % 7]}">${ICO(n, 76)}</div>`));
     c.cap = E(SUB(`À l’école, la tablette aide [chaque élève] à apprendre.`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); P(c.title, 800, 125, { o: k(t, 0, .4), s: lerp(.96, 1, eo(k(t, 0, .6))) });
-    P(c.ip, 800, 465, { s: .58 });
-    c.b.forEach((b, i) => { const ang = (i / 6) * Math.PI * 2 + t * .35; const R = 330 * eo(k(t, .4 + i * .1, 1.2 + i * .1));
-      P(b, 800 + Math.cos(ang) * R * 1.3, 465 + Math.sin(ang) * R * .62, { s: eo(k(t, .4 + i * .1, .9 + i * .1)) }); });
-    P(c.cap, 800, 815); subUp(c.cap, t, 1.6); } });
+  up(c, t) { P(c.bg, 800, 450); P(c.title, 800, 125, { o: k(t, .2, .6), s: lerp(.96, 1, eo(k(t, .2, .8))) });
+    /* Morph : l'iPad de la scène précédente rétrécit sur place */
+    const z = io(k(t, .35, 1.1)); P(c.ip, 800, lerp(470, 465, z), { s: lerp(1, .58, z) });
+    c.b.forEach((b, i) => { const ang = (i / 6) * Math.PI * 2 + t * .35; const R = 330 * eo(k(t, .7 + i * .1, 1.5 + i * .1));
+      P(b, 800 + Math.cos(ang) * R * 1.3, 465 + Math.sin(ang) * R * .62, { s: eo(k(t, .7 + i * .1, 1.2 + i * .1)) }); });
+    P(c.cap, 800, 815); subUp(c.cap, t, 1.8); } });
 
 const OBJ = [["laptop", "#DCE9FB", "Développer les compétences numériques"], ["shuffle", "#FADDE3", "Varier les façons d’apprendre"], ["target", "#DCF1E4", "Un outil adapté à chaque élève"]];
-SCENES.push({ d: 9, m: "color",
+SCENES.push({ d: 9.8, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.h = E(`<div class="v-h" style="font-size:104px">Nos 3 objectifs<span style="color:#F0997B">.</span></div>`);
-    c.cards = OBJ.map(([n, col, t], i) => E(`<div class="v-card"><div class="v-art" style="background:${col}">${ICO(n, 120)}</div><div class="v-body"><div class="v-num">0${i + 1}</div><div class="v-t">${t}</div></div></div>`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); P(c.h, 800, 125, { o: k(t, 0, .4) });
-    c.cards.forEach((el, i) => { const a = .7 + i * 2.2, on = (t >= a && t < a + 2.2) || (i === 2 && t >= a);
+    c.cards = OBJ.map(([n, col, t], i) => E(`<div class="v-card"><div class="v-art" style="background:${col}">${ICO(n, 110)}</div><div class="v-body"><div class="v-num">0${i + 1}</div><div class="v-t">${t}</div></div></div>`)); return c; },
+  up(c, t) { P(c.bg, 800, 450); P(c.h, 800, 115, { o: k(t, 0, .4) });
+    c.cards.forEach((el, i) => { const a = .4 + i * 2.3, on = (t >= a && t < a + 2.3) || (i === 2 && t >= a);
       const p = ex(k(t, a, a + .5)); el.firstChild.classList.toggle("on", on);
-      P(el, 330 + i * 470, 530 + 60 * (1 - p), { o: p, s: on ? 1.04 : .97 }); }); } });
+      P(el, 310 + i * 490, 530 + 60 * (1 - p), { o: p, s: on ? 1.03 : .97 }); }); } });
 
-SCENES.push({ d: 6.5, m: "color",
+SCENES.push({ d: 7, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.r = ronds();
     c.a = E(`<div class="v-h" style="font-size:130px">1 élève</div>`); c.b = E(`<div class="v-h" style="font-size:130px">1 tablette</div>`);
     c.n = E(`<div class="v-h" style="font-size:270px"><span class="v-mk">1</span></div>`); c.l = E(`<div class="v-h" style="font-size:100px">façons d’apprendre<span style="color:#F0997B">.</span></div>`);
     c.cf = confetti(40, 800, 430); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t); const up = eo(k(t, 1.8, 2.5));
-    const pa = eo(k(t, 0, .5)), pb = eo(k(t, .7, 1.2));
+  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t); const up = eo(k(t, 1.9, 2.6));
+    const pa = eo(k(t, 0, .5)), pb = eo(k(t, .6, 1.1));
     P(c.a, lerp(450, 560, up), lerp(430, 150, up) + 50 * (1 - pa), { s: lerp(1, .6, up), o: pa });
     P(c.b, lerp(1150, 1040, up), lerp(430, 150, up) + 50 * (1 - pb), { s: lerp(1, .6, up), o: pb });
-    const cnt = Math.round(lerp(1, 1000, eo(k(t, 2.4, 3.9)))); c.n.firstChild.firstChild.textContent = cnt >= 1000 ? "1 000" : String(cnt);
-    P(c.n, 800, 430, { o: k(t, 2.2, 2.5), s: lerp(.9, 1, eo(k(t, 2.2, 2.7))) });
-    const pl = eo(k(t, 3.9, 4.4)); P(c.l, 800, 680 + 40 * (1 - pl), { o: pl });
-    confUp(c.cf, t, 3.9); } });
+    const cnt = Math.round(lerp(1, 1000, eo(k(t, 2.5, 4.0)))); c.n.firstChild.firstChild.textContent = cnt >= 1000 ? "1 000" : String(cnt);
+    P(c.n, 800, 430, { o: k(t, 2.3, 2.6), s: lerp(.9, 1, eo(k(t, 2.3, 2.8))) });
+    const pl = eo(k(t, 4.0, 4.5)); P(c.l, 800, 680 + 40 * (1 - pl), { o: pl });
+    confUp(c.cf, t, 4.0); } });
 
 /* ===== Partie 3 : la bande-annonce ===== */
 chap("La bande-annonce");
-SCENES.push({ d: 3.4, m: "color",
-  mk() { const c = { bg: E(WHITE) };     c.t = E(`<div class="v-h" style="font-size:120px;text-align:center;line-height:1.08"><span></span><i class="v-cur"></i></div>`); return c; },
-  up(c, t) { P(c.bg, 800, 450); const txt = "Au Chêneux,\non apprend autrement…"; const n = Math.floor(k(t, .4, 2) * txt.length);
-    c.t.firstChild.firstChild.innerHTML = txt.slice(0, n).replace("\n", "<br>");
+const TXT_TAPE = "Au Chêneux,\non apprend autrement…", D_TAPE = 4.2;
+SCENES.push({ d: D_TAPE, m: "color",
+  mk() { const c = { bg: E(WHITE) }; c.t = E(`<div class="v-h" style="font-size:120px;text-align:center;line-height:1.08"><span></span><i class="v-cur"></i></div>`); return c; },
+  up(c, t) { P(c.bg, 800, 450); const n = Math.floor(k(t, .2, 1.8) * TXT_TAPE.length);
+    c.t.firstChild.firstChild.innerHTML = TXT_TAPE.slice(0, n).replace("\n", "<br>");
     c.t.querySelector(".v-cur").style.opacity = Math.floor(t * 2.4) % 2 ? 0 : 1;
-    P(c.t, 800, 480, { o: 1 - k(t, 3.1, 3.4) }); } });
+    P(c.t, 800, 480); } });
 
-let prevCol = null;
-function trailer(n, title, tag, col, d, ill) {
-  const pc = prevCol, last = /^Et bien/.test(title); prevCol = col;
-  SCENES.push({ d, m: "color",
-    mk() { const c = { bg: E(WHITE) }; if (pc) c.pan0 = E(`<div class="v-pan" style="background:${pc}"></div>`);
-      c.pan = E(`<div class="v-pan" style="background:${col}"></div>`); c.ill = E("", "ill"); c.i = ill.mk(c.ill);
-      const fin = /…$/.test(title) ? "" : `<span style="color:#F0997B">.</span>`;
-      c.t = E(`<div class="v-h" style="font-size:100px;width:700px;white-space:normal;line-height:1">${title}${fin}</div>`); c.g = E(`<div class="v-tag">${tag}</div>`); return c; },
-    up(c, t) { const first = !pc, pin = first ? ex(k(t, 0, .5)) : 1, px = lerp(-380, 430, pin);
-      const out = k(t, d - (last ? .35 : .25), d), oc = last ? 1 - out : 1 - out * out, op = last ? 1 - out : 1;
-      const cin = ex(k(t, 0, .4)), iin = ex(k(t, .1, .5));
-      P(c.bg, 800, 450);
-      if (c.pan0) P(c.pan0, px, 450, { o: op });
-      P(c.pan, px, 450, { o: (first ? 1 : cin) * op });
-      P(c.ill, px, 450, { o: (first ? 1 : iin) * oc, s: first ? 1 : lerp(.92, 1, iin) }); ill.up(c.i, t);
-      const pt = eo(k(t, .1, .65)); P(c.t, 1180 + 160 * (1 - pt), 400, { o: pt * oc });
-      P(c.g, 1180, 640, { o: k(t, .5, .9) * oc }); } });
+/* Poussée latérale : chaque activité est une « page » (texte à gauche, dessin à droite).
+   Le texte de la page suivante arrive de la droite et pousse le dessin précédent hors du cadre. */
+const PAGE_TAPE = { mk(pg) { return { t: E(`<div class="v-h" style="font-size:120px;text-align:center;line-height:1.08">${TXT_TAPE.replace("\n", "<br>")}<i class="v-cur" style="opacity:0"></i></div>`, "", pg) }; },
+  up(c) { P(c.t, 800, 480); } };
+function pageAct(title, tag, col, ill) {
+  const fin = /…$/.test(title) ? "" : `<span style="color:#F0997B">.</span>`;
+  return { mk(pg) { const c = {}; c.pan = E(`<div class="v-pan" style="background:${col}"></div>`, "", pg); c.box = E("", "ill", pg); c.i = ill.mk(c.box);
+      c.txt = E(`<div style="width:700px"><div class="v-h" style="font-size:100px;white-space:normal;line-height:1">${title}${fin}</div><div class="v-tag" style="margin-top:40px">${tag}</div></div>`, "", pg);
+      c.tag = c.txt.querySelector(".v-tag"); return c; },
+    up(c, t, lag = 0, lagTag = 0) { P(c.txt, 480, 450); c.tag.style.transform = `translateX(${lagTag}px)`;
+      P(c.pan, 1160 + lag, 450); P(c.box, 1160 + lag, 450); ill.up(c.i, t); } };
 }
-trailer("01", "Minecraft", "Construire ensemble.\nRésoudre des défis.\nApprendre en jouant.", "#DCF1E4", 4.2, {
+let pagePrec = PAGE_TAPE, dPrec = D_TAPE;
+function trailer(n, title, tag, col, d, ill) {
+  const pp = pagePrec, pd = dPrec, pg = pageAct(title, tag, col, ill); pagePrec = pg; dPrec = d;
+  SCENES.push({ d, m: "color", tr: "push",
+    mk() { const c = { bg: E(WHITE) }; c.p0 = E("", "full"); c.c0 = pp.mk(c.p0); c.p1 = E("", "full"); c.c1 = pg.mk(c.p1); return c; },
+    up(c, t) { P(c.bg, 800, 450);
+      const p = REDUIT_V ? 1 : io(k(t, 0, .85)), p2 = REDUIT_V ? 1 : io(k(t, .05, .9)), p3 = REDUIT_V ? 1 : io(k(t, .1, .95));
+      c.p0.style.visibility = p < 1 ? "" : "hidden"; if (p < 1) { P(c.p0, 800 - 1600 * p, 450); pp.up(c.c0, pd + t); }
+      P(c.p1, 800 + 1600 * (1 - p), 450); pg.up(c.c1, t, 1600 * (p - p3), 1600 * (p - p2)); } });
+}
+trailer("01", "Minecraft", "Construire ensemble.\nRésoudre des défis.\nApprendre en jouant.", "#DCF1E4", 5.2, {
   mk(box) { const L = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [0, 0, 2]];
     const draw = L.map((p, i) => ({ p, i })).sort((a, b) => (a.p[0] + a.p[1] + a.p[2]) - (b.p[0] + b.p[1] + b.p[2]) || a.p[2] - b.p[2]);
     const cols = [["#97C459", "#BA7517", "#8F5A14"], ["#CDD5DF", "#AAB4C0", "#8C97A5"], ["#9FE1CB", "#5DCAA5", "#1D9E75"]];
     const c = { cubes: [] }; draw.forEach(({ p, i }) => { const cc = cols[i === 7 ? 2 : (i === 3 || i === 5) ? 1 : 0]; c.cubes.push({ el: E(cube(...cc), "", box), p, i }); }); return c; },
-  up(c, t) { c.cubes.forEach(({ el, p, i }) => { const a = .3 + i * .3, q = eo(k(t, a, a + .4)); const x = 300 + (p[0] - p[1]) * 60, y = 330 + (p[0] + p[1]) * 34 - p[2] * 70;
+  up(c, t) { c.cubes.forEach(({ el, p, i }) => { const a = i ? .3 + i * .3 : -1, q = eo(k(t, a, a + .4)); const x = 300 + (p[0] - p[1]) * 60, y = 330 + (p[0] + p[1]) * 34 - p[2] * 70;
     P(el, x, lerp(y - 260, y, q), { o: k(t, a, a + .15) }); }); } });
-trailer("02", "Robotique", "Programmer un robot.\nTester, se tromper,\nrecommencer !", "#DCE9FB", 4.0, {
+trailer("02", "Robotique", "Programmer un robot.\nTester, se tromper,\nrecommencer !", "#DCE9FB", 5.0, {
   mk(box) { const c = {}; c.g = E(`<div class="v-grille"></div>`, "", box);
     c.path = [[0, 3], [0, 1], [2, 1], [2, 0], [3, 0]]; c.dots = [];
     for (let i = 0; i < 9; i++) c.dots.push(E("", "v-pt", box)); c.star = E(STAR(90), "", box); c.r = E(ROBOT, "", box); return c; },
-  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .4, 2.8) * segs;
+  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .6, 3.2) * segs;
     const sI = Math.min(segs - 1, Math.floor(p)), f = eo(p - sI), A = c.path[sI], B = c.path[sI + 1];
     P(c.r, lerp(cx(A[0]), cx(B[0]), f), lerp(cx(A[1]), cx(B[1]), f), { r: Math.sin(t * 8) * 3 });
     c.dots.forEach((d, i) => { const q = i / 8 * segs; const j = Math.min(segs - 1, Math.floor(q)), g = q - j, a = c.path[j], b = c.path[j + 1];
       P(d, lerp(cx(a[0]), cx(b[0]), g), lerp(cx(a[1]), cx(b[1]), g), { o: q < p - .15 ? 1 : 0 }); });
-    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 2.8, 3.4)), r: 12 * Math.sin(t * 2) }); } });
-trailer("03", "Intelligence collective", "Penser à plusieurs.\nPartager ses idées.\nChaque idée compte.", "#FAF0C8", 3.6, {
-  mk(box) { const N = [[150, 150, "#FAF0C8", "Idée !"], [440, 130, "#FADDE3", "Et si… ?"], [300, 320, "#DCE9FB", "On essaie ?"], [150, 470, "#DCF1E4", "Moi aussi !"], [450, 470, "#FDE5D3", "Bravo !"]];
+    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 3.2, 3.8)), r: 12 * Math.sin(t * 2) }); } });
+trailer("03", "Intelligence collective", "Penser à plusieurs\nsur un même tableau Freeform.\nChaque idée compte.", "#FAF0C8", 5.6, {
+  mk(box) { const N = [[150, 150, "#FAF0C8", "Idée !"], [440, 130, "#FADDE3", "Et si… ?"], [300, 320, "#DCE9FB", "On essaie ?"], [150, 470, "#DCF1E4", "Moi aussi !"], [450, 470, "#FDE5D3", "Bravo !"]];
     const Ls = [[0, 2], [1, 2], [2, 3], [2, 4], [0, 1]];
     const c = { N }; c.board = E(`<div class="v-board"></div>`, "", box);
     c.svg = E(sv("0 0 600 600", 600, 600, Ls.map(([a, b]) => `<line x1="${N[a][0]}" y1="${N[a][1]}" x2="${N[b][0]}" y2="${N[b][1]}" stroke="#737373" stroke-width="5" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400"/>`).join("")), "", box);
     c.lines = [...c.svg.querySelectorAll("line")]; c.notes = N.map(n => E(`<div class="v-note" style="background:${n[2]}">${n[3]}</div>`, "", box)); return c; },
   up(c, t) { P(c.board, 300, 300); P(c.svg, 300, 300);
-    c.notes.forEach((el, i) => { const a = .3 + i * .25, q = eo(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1] + 30 * (1 - q), { o: q, r: i % 2 ? 3 : -3 }); });
-    c.lines.forEach((l, i) => l.setAttribute("stroke-dashoffset", 400 * (1 - eo(k(t, 1.9 + i * .2, 2.5 + i * .2))))); } });
-trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", "#E7E0FA", 3.4, {
+    c.notes.forEach((el, i) => { const a = .5 + i * .3, q = eo(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1] + 30 * (1 - q), { o: q, r: i % 2 ? 3 : -3 }); });
+    c.lines.forEach((l, i) => l.setAttribute("stroke-dashoffset", 400 * (1 - eo(k(t, 2.2 + i * .2, 2.8 + i * .2))))); } });
+trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", "#E7E0FA", 4.8, {
   mk(box) { const c = {}; c.p = E(`<div class="v-poster"></div>`, "", box);
     c.parts = [`<div style="width:300px;height:80px;border-radius:16px;background:#AFA9EC"></div>`, `<div style="width:170px;height:170px;border-radius:50%;background:#9FE1CB"></div>`,
       STAR(110), `<div style="width:280px;height:26px;border-radius:13px;background:#0a0a0a"></div>`, `<div style="width:200px;height:26px;border-radius:13px;background:#DCDCDC"></div>`].map(h => E(h, "", box));
     c.sw = ["#F0997B", "#FAC775", "#9FE1CB", "#AFA9EC"].map(col => E(`<div class="v-sw" style="background:${col}"></div>`, "", box)); c.hand = E(CURSEUR, "", box); return c; },
-  up(c, t) { P(c.p, 270, 300, { r: -2, o: k(t, 0, .3) }); const pos = [[270, 120], [210, 270], [370, 250], [270, 420], [240, 470]];
-    c.parts.forEach((el, i) => { const a = .5 + i * .45, q = eo(k(t, a, a + .35)); P(el, pos[i][0], pos[i][1], { s: lerp(.6, 1, q), o: q, r: -2 }); });
-    c.sw.forEach((el, i) => P(el, 545, 140 + i * 100, { o: k(t, .2 + i * .1, .5 + i * .1) }));
-    const hp = (t * 1.1) % 1, step = Math.floor(t * 1.1) % 4; P(c.hand, lerp(560, 300, eo(hp)), lerp(160 + step * 100, 330, eo(hp)), { o: t < 3.7 ? 1 : 0 }); } });
-trailer("05", "Réalisation de vidéos", "Écrire, filmer, monter :\nraconter ses histoires.", "#FADDE3", 3.4, {
-  mk(box) { const c = {}; c.c = E(CLAP, "", box); c.arm = c.c.querySelector(".arm"); c.act = E(`<div class="v-h" style="font-size:90px"><span class="v-mk">Action !</span></div>`, "", box);
+  up(c, t) { P(c.p, 270, 300, { r: -2 }); const pos = [[270, 120], [210, 270], [370, 250], [270, 420], [240, 470]];
+    c.parts.forEach((el, i) => { const a = .6 + i * .45, q = eo(k(t, a, a + .35)); P(el, pos[i][0], pos[i][1], { s: lerp(.6, 1, q), o: q, r: -2 }); });
+    c.sw.forEach((el, i) => P(el, 545, 140 + i * 100));
+    const hp = (t * 1.1) % 1, step = Math.floor(t * 1.1) % 4; P(c.hand, lerp(560, 300, eo(hp)), lerp(160 + step * 100, 330, eo(hp))); } });
+trailer("05", "Réalisation de vidéos", "Écrire, filmer, monter :\nraconter ses histoires.", "#FADDE3", 4.8, {
+  mk(box) { const c = {}; c.c = E(CLAP, "", box); c.arm = c.c.querySelector(".arm"); c.act = E(`<div class="v-h" style="font-size:90px"><span class="v-mk">Action !</span></div>`, "", box);
     c.rec = E(`<div class="v-rec"><i></i>REC</div>`, "", box); return c; },
-  up(c, t) { P(c.c, 300, 340, { r: -3 }); const close = eo(k(t, .6, .85)); c.arm.setAttribute("transform", `rotate(${lerp(-26, 0, close)} 30 76)`);
-    P(c.act, 300, 95, { o: k(t, .9, 1.2), s: lerp(.9, 1, eo(k(t, .9, 1.3))) });
-    c.rec.querySelector("i").style.opacity = .35 + .65 * Math.abs(Math.cos(t * 3)); P(c.rec, 300, 545, { o: k(t, 1.3, 1.6) }); } });
-trailer("06", "Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux pour apprendre…", "#FDE5D3", 3.6, {
+  up(c, t) { P(c.c, 300, 340, { r: -3 }); const close = eo(k(t, 1.0, 1.25)); c.arm.setAttribute("transform", `rotate(${lerp(-26, 0, close)} 30 76)`);
+    P(c.act, 300, 95, { o: k(t, 1.3, 1.6), s: lerp(.9, 1, eo(k(t, 1.3, 1.7))) });
+    c.rec.querySelector("i").style.opacity = .35 + .65 * Math.abs(Math.cos(t * 3)); P(c.rec, 300, 545, { o: k(t, 1.7, 2.0) }); } });
+trailer("06", "Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux pour apprendre…", "#FDE5D3", 5.0, {
   mk(box) { return { e: [["film", "#FDE5D3"], ["mic", "#DCE9FB"], ["book", "#FAF0C8"], ["gamepad", "#E7E0FA"], ["globe", "#DCF1E4"]].map(([n, col]) => E(`<div class="v-big"><div style="width:230px;height:230px;border-radius:50%;background:${col};display:grid;place-items:center">${ICO(n, 170)}</div></div>`, "", box)) }; },
-  up(c, t) { c.e.forEach((el, j) => { const a = .2 + j * .6, q = eo(k(t, a, a + .3)), z = j < 4 ? k(t, a + .5, a + .66) : 0;
+  up(c, t) { c.e.forEach((el, j) => { const a = j ? .6 + j * .75 : -1, q = eo(k(t, a, a + .3)), z = j < 4 ? k(t, .6 + (j + 1) * .75 - .1, .6 + (j + 1) * .75 + .06) : 0;
     P(el, 300 - 60 * z, 300, { s: lerp(.85, 1, q), o: q * (1 - z), r: lerp(-4, 0, q) }); }); } });
 
-SCENES.push({ d: 8, m: "color",
+SCENES.push({ d: 8.5, m: "color",
   mk() { const c = { bg: E(WHITE) }; c.r = ronds();
     c.l1 = E(`<div class="v-h" style="font-size:100px">1 élève.</div>`); c.l2 = E(`<div class="v-h" style="font-size:100px">1 tablette.</div>`);
     c.l3 = E(`<div class="v-h" style="font-size:104px">1 000 façons d’<span class="v-mk">apprendre</span>.</div>`);
     c.sch = E(`<div class="v-eye">EESSCF Le Chêneux · StarTechs Days 2026</div>`);
-    c.q = E(`<div class="v-h" style="font-size:112px">Et toi, que vas-tu créer<span style="color:#F0997B"> ?</span></div>`); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t);
-    const up = eo(k(t, 3.4, 4.2)), f = (a) => eo(k(t, a, a + .5));
-    P(c.l1, 800, lerp(250, 110, up) + 40 * (1 - f(.2)), { s: lerp(1, .55, up), o: f(.2) });
-    P(c.l2, 800, lerp(390, 190, up) + 40 * (1 - f(.9)), { s: lerp(1, .55, up), o: f(.9) });
-    P(c.l3, 800, lerp(540, 275, up) + 40 * (1 - f(1.6)), { s: lerp(1, .6, up), o: f(1.6) });
-    P(c.q, 800, 530 + 50 * (1 - f(4.4)), { o: f(4.4) });
-    P(c.sch, 800, 760, { o: k(t, 5.2, 5.7) }); } });
+    c.q = E(`<div class="v-h" style="font-size:112px">Et toi, que vas-tu créer<span style="color:#F0997B"> ?</span></div>`); return c; },
+  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .4));
+    const up = eo(k(t, 3.2, 4.0)), f = (a) => eo(k(t, a, a + .5));
+    P(c.l1, 800, lerp(250, 110, up) + 40 * (1 - f(0)), { s: lerp(1, .55, up), o: f(0) });
+    P(c.l2, 800, lerp(390, 190, up) + 40 * (1 - f(.7)), { s: lerp(1, .55, up), o: f(.7) });
+    P(c.l3, 800, lerp(540, 275, up) + 40 * (1 - f(1.4)), { s: lerp(1, .6, up), o: f(1.4) });
+    P(c.q, 800, 530 + 50 * (1 - f(4.2)), { o: f(4.2) });
+    P(c.sch, 800, 760, { o: k(t, 5.0, 5.5) }); } });
 
 /* ---------- Lecteur ---------- */
 const TOTAL = SCENES.reduce((s, x) => s + x.d, 0);
+const FOND = .4, PV = document.createElement("div"); PV.id = "stage-prev"; ST.after(PV);
 let T = 0, playing = false, cur = -1, ctx = null, lastTick = 0, lastFrame = -1, raf = 0;
 const BOUCLE = location.hash === "#boucle";
 const fmt = s => Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0");
@@ -1040,7 +1079,9 @@ function render() {
   const [i, t] = sceneAt(T);
   const muet = SCENES[i].m === "muet", fx = $("fx");
   JIT = muet ? 1 : 0;
-  if (i !== cur) { ST.innerHTML = ""; ST.className = SCENES[i].m; ctx = SCENES[i].mk(); cur = i; }
+  if (i !== cur) { /* Fondu enchaîné 0,4 s : on garde une copie de la scène qui part, posée au-dessus */
+    if (cur >= 0 && (SCENES[i].tr !== "push" || REDUIT_V)) { PV.innerHTML = ST.innerHTML; PV.className = ST.className; } else PV.innerHTML = "";
+    ST.innerHTML = ""; ST.className = SCENES[i].m; ctx = SCENES[i].mk(); cur = i; }
   SCENES[i].up(ctx, t);
   fx.classList.toggle("on", muet);
   if (muet) {
@@ -1048,6 +1089,7 @@ function render() {
     ["scr1", "scr2"].forEach(id => { const s = $(id); s.style.left = Math.random() * 100 + "%"; s.style.opacity = Math.random() > .88 ? Math.random() * .6 : 0; });
   }
   ST.style.transform = `scale(${SCALE})` + (muet && !SCENES[i].fixe ? ` translate(${jr(.7)}px,${jr(1)}px)` : "");
+  if (PV.firstChild) { const o = 1 - io(k(t, 0, FOND)); if (o <= 0) PV.innerHTML = ""; else { PV.style.opacity = o; PV.style.transform = ST.style.transform; } }
 }
 function tick(now) {
   if (!playing) return;
@@ -1074,7 +1116,7 @@ function openVideo() {
   $("player").hidden = false; document.body.style.overflow = "hidden"; fit(); T = 0; cur = -1; render(); setPlaying(true); $("vClose").focus();
 }
 function closeVideo() {
-  setPlaying(false); $("player").hidden = true; document.body.style.overflow = ""; ST.innerHTML = ""; cur = -1;
+  setPlaying(false); $("player").hidden = true; document.body.style.overflow = ""; ST.innerHTML = ""; PV.innerHTML = ""; cur = -1;
   if (location.hash) history.replaceState(null, "", location.pathname + location.search); $("openVideo").focus();
 }
 $("vClose").addEventListener("click", closeVideo);
@@ -1082,7 +1124,7 @@ $("vHome").addEventListener("click", closeVideo);
 $("vAgain").addEventListener("click", () => { T = 0; cur = -1; render(); setPlaying(true); });
 $("box").addEventListener("click", e => { if (e.target.closest(".endmenu")) return; setPlaying(!playing); });
 /* Pour les tests automatiques : aller à un moment précis de la vidéo */
-window.__video = { aller(s) { T = s; cur = -1; render(); }, duree: TOTAL };
+window.__video = { aller(s) { T = s; cur = -1; PV.innerHTML = ""; render(); }, pas(dt) { T += dt; render(); }, duree: TOTAL };
 addEventListener("resize", () => { if (!$("player").hidden) { fit(); render(); } });
 addEventListener("keydown", e => {
   if ($("player").hidden) return;

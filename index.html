@@ -247,7 +247,7 @@ html.aimant #titre{animation:none}
 .v-rond{border-radius:50%}
 .v-ipad{width:560px;height:420px;background:#0a0a0a;border-radius:54px;padding:22px;box-shadow:0 30px 70px rgba(10,10,10,.14)}
 .v-scr{width:100%;height:100%;background:#fff;border-radius:32px;display:flex;flex-direction:column;padding:22px 30px 30px}
-.v-bar{width:90px;height:8px;border-radius:4px;background:#ececec;align-self:center;margin-bottom:22px}
+.v-bar{width:90px;height:8px;border-radius:4px;background:#ececec;align-self:center;margin-bottom:22px;visibility:hidden}
 .v-grid{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:18px;align-content:center}
 .v-app{aspect-ratio:1;border-radius:26px;display:grid;place-items:center}
 .v-bulle{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;border:4px solid #fff;box-shadow:0 14px 34px rgba(10,10,10,.08)}
@@ -284,7 +284,7 @@ html.aimant #titre{animation:none}
 .pt3 i,.pt3 .pt{display:inline-block;width:.15em;height:.15em;border-radius:50%;background:#0a0a0a;margin-left:.06em}.pt3 .pt{background:#F0997B}
 .v-mk2{background:linear-gradient(#FDE5D3,#FDE5D3) no-repeat 0 88%/0% 42%;padding:0 .06em}
 .v-field{box-sizing:border-box}
-.v-eye .ln{display:inline-block;overflow:hidden;vertical-align:top}.v-eye .in{display:inline-block}
+.v-eye .ln{display:inline-block;overflow:hidden;vertical-align:top}.v-eye .in{display:inline-block;transform-origin:0 100%}
 
 @media (prefers-reduced-motion:reduce){
   .site-header *,.intro *,.activites *,dialog,dialog *,.pied *{animation:none!important;transition:none!important}
@@ -944,7 +944,7 @@ function trace(root, t, a, d = .55, pas = .07) {
   if (!root._tr) { root._tr = [...root.querySelectorAll("path,rect,circle,line,polygon")];
     root._tr.forEach(e => { const f = e.getAttribute("fill"); if (f && f !== "none") e._f = 1; else { e.setAttribute("pathLength", "1"); e.style.strokeDasharray = "1 1"; } }); }
   root._tr.forEach((e, i) => { const q = io(k(t, a + i * pas, a + i * pas + d));
-    if (e._f) e.style.opacity = q > .85 ? 1 : 0; else { e.style.strokeDashoffset = 1 - q; e.style.opacity = q > 0 ? 1 : 0; } });
+    if (e._f) e.style.opacity = q > .85 ? 1 : 0; else { e.style.strokeDashoffset = 1 - q; e.style.opacity = Math.min(1, q / .08); } });
 }
 const FIELD = col => `<div class="v-field" style="background:${col}"></div>`;
 /* v3.1 — L'écran d'accueil de l'iPad : une appli par activité (couleur = panneau de l'activité) */
@@ -1133,9 +1133,9 @@ SCENES.push({ d: 8.6, m: "color",
     P(c.cv, 800, 450);
     P(c.l, 800, 690); ktUp(c.l, t, 4.4, 7.4); } });
 
-/* ===== 6. « Au Chêneux, on fait classe autrement… » s'écrit sur l'écran de l'iPad : la caméra recule, l'écran d'accueil apparaît ===== */
+/* ===== 6. « Au Chêneux, on enseigne autrement… » s'écrit sur l'écran de l'iPad : la caméra recule, l'écran d'accueil apparaît ===== */
 chap("La bande-annonce");
-const TXT_TAPE = "Au Chêneux,\non fait classe autrement";
+const TXT_TAPE = "Au Chêneux,\non enseigne autrement";
 SCENES.push({ d: 7.2, m: "color",
   mk() { const c = {}; c.h = accueil(ST);
     c.t = E(`<div class="v-h" style="font-size:112px;text-align:center;line-height:1.08"><span style="display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .1em .17em;margin:-.1em -.1em -.17em"><span class="in" style="display:inline-block"><span></span><span class="pt3"><i></i><i></i></span><i class="v-cur"></i></span></span></div>`);

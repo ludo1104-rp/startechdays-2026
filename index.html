@@ -277,6 +277,14 @@ html.aimant #titre{animation:none}
 .v-rec i{width:26px;height:26px;border-radius:50%;background:#F0997B;display:block}
 .v-big{width:330px;height:330px;border-radius:70px;background:#fff;display:grid;place-items:center;box-shadow:0 20px 50px rgba(10,10,10,.1)}
 .v-conf{width:26px;height:26px;border-radius:8px}
+.kt{font-weight:600;letter-spacing:-.045em;line-height:1.05;color:#0a0a0a;white-space:nowrap}
+.kt .ln{display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .05em .17em;margin:-.1em -.05em -.17em}
+.kt .in{display:inline-block;transform-origin:0 100%}
+.pt{display:inline-block;width:.2em;height:.2em;border-radius:50%;background:#F0997B;margin-left:.05em}
+.pt3 i,.pt3 .pt{display:inline-block;width:.15em;height:.15em;border-radius:50%;background:#0a0a0a;margin-left:.06em}.pt3 .pt{background:#F0997B}
+.v-mk2{background:linear-gradient(#FDE5D3,#FDE5D3) no-repeat 0 88%/0% 42%;padding:0 .06em}
+.v-field{box-sizing:border-box}
+.v-eye .ln{display:inline-block;overflow:hidden;vertical-align:top}.v-eye .in{display:inline-block}
 
 @media (prefers-reduced-motion:reduce){
   .site-header *,.intro *,.activites *,dialog,dialog *,.pied *{animation:none!important;transition:none!important}
@@ -817,6 +825,7 @@ const ICONES = {
   gamepad: `<path d="M15 16h18a8 8 0 0 1 8 8l1 7a5 5 0 0 1-9 3l-3-4H18l-3 4a5 5 0 0 1-9-3l1-7a8 8 0 0 1 8-8z"/><path d="M16 21v8M12 25h8"/><circle cx="31" cy="23" r="1.8" fill="#0a0a0a"/><circle cx="35" cy="27" r="1.8" fill="#0a0a0a"/>`,
   laptop: `<rect x="11" y="12" width="26" height="18" rx="2"/><path d="M6 36h36l-3-6H9z"/>`,
   shuffle: `<path d="M8 16h7l18 16h7M8 32h7l5-4.5M28 20.5l5-4.5h7M36 12l4 4-4 4M36 28l4 4-4 4"/>`,
+  plus: `<path d="M24 12v24M12 24h24"/>`,
   target: `<circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2.2" fill="#0a0a0a"/>`
 };
 const ICO = (n, s) => `<svg viewBox="0 0 48 48" width="${s}" height="${s}" fill="none" stroke="#0a0a0a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${ICONES[n]}</svg>`;
@@ -875,199 +884,392 @@ const OMBRE = `<div style="width:540px;height:64px;border-radius:50%;background:
 const MALLETTE_OBJ = [["book", "#FDE5D3"], ["pencil", "#FAF0C8"], ["numbers", "#DCE9FB"], ["globe", "#DCF1E4"], ["palette", "#FADDE3"], ["clap", "#E7E0FA"], ["mic", "#D3EFEC"], ["cube", "#FDE5D3"]];
 /* Où se posent les objets sortis : un arc au-dessus de la mallette */
 const ARC = [200, 228, 256, 284, 312, 340].map(a => [800 + 560 * Math.cos(a * Math.PI / 180), 590 + 300 * Math.sin(a * Math.PI / 180)]);
-SCENES.push({ d: 11, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
-    c.t1 = E(`<div class="v-h" style="font-size:96px">Que cache cette mallette<span style="color:#F0997B"> ?</span></div>`);
-    c.t2 = E(`<div class="v-h" style="font-size:96px">Tout ça… dans une <span class="v-mk">tablette</span><span style="color:#F0997B"> ?</span></div>`);
-    c.ip = E(IPAD(MALLETTE_OBJ)); c.apps = [...c.ip.querySelectorAll(".v-app")];
-    c.om = E(OMBRE); c.arr = E(MAL_ARR); c.lid = c.arr.querySelector(".mal-lid");
-    c.o = MALLETTE_OBJ.slice(0, 6).map(([n, col]) => E(`<div style="width:140px;height:140px;border-radius:50%;background:${col};display:grid;place-items:center;box-shadow:0 12px 30px rgba(10,10,10,.08)">${ICO(n, 84)}</div>`));
-    c.av = E(MAL_AV); c.lat = [...c.av.querySelectorAll(".lat")];
+/* =====================================================================
+   VIDÉO v3.1 — « L'iPad, fil conducteur » : un seul plan continu.
+   Aucune coupe visible : chaque scène finit sur l'image exacte où commence
+   la suivante. Le héros est l'iPad : il naît des objets de la mallette, ses
+   applis se multiplient (« 1 001 »), la caméra ouvre ses applis (activités)
+   et il se range dans la mallette à la fin (raccord de la boucle).
+   Le point pêche ne sert plus qu'à ponctuer les titres.
+   Les textes sortent d'un masque (jamais de fondu), les dessins se tracent.
+   ===================================================================== */
+const PEACH = [240, 153, 123];
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const ei = p => p * p * p; /* sortie : accélère */
+
+/* Texte cinétique : chaque mot est caché sous un masque et en sort.
+   [mot] = surligné pêche · « ? » en pêche · « . » final = point pêche (le héros) · « … » = 2 points + 1 pêche */
+function KT(txt, size, o = {}) {
+  const lines = txt.split("\n").map(l => l.match(/\[[^\]]+\][^ ]*|[^ ]+/g).map(w => {
+    let h = w.replace(/\[([^\]]+)\]/, '<span class="v-mk2">$1</span>');
+    if (!o.plain) h = h.replace(/…$/, '<span class="pt3"><i></i><i></i><span class="pt"></span></span>').replace(/\.$/, '<span class="pt"></span>');
+    h = h.replace(/([?!])$/, '<span style="color:#F0997B">$1</span>');
+    return `<span class="ln"><span class="in">${h}</span></span>`; }).join(" "));
+  return `<div class="kt" style="font-size:${size}px;text-align:${o.align || "center"};${o.css || ""}">${lines.map(l => `<div>${l}</div>`).join("")}</div>`;
+}
+/* Sortie du masque : départ a, sortie z (vers le haut), décalage st entre mots */
+function ktUp(el, t, a, z = 99, st = .07) {
+  const ins = el._ins || (el._ins = [...el.querySelectorAll(".in")]);
+  ins.forEach((w, i) => { const q = ex(k(t, a + i * st, a + i * st + .75)), out = ei(k(t, z + i * .035, z + i * .035 + .3));
+    w.style.transform = q >= 1 && out <= 0 ? "none" : `translateY(${140 * (1 - q) - 145 * out}%) rotate(${5 * (1 - q)}deg)`; });
+  const hl = el._hl || (el._hl = el.querySelector(".v-mk2") || 0);
+  if (hl) { const b = a + ins.length * st + .25; hl.style.backgroundSize = `${100 * eo(k(t, b, b + .5))}% 42%`; }
+}
+function ktReveal(el) { (el._ins || (el._ins = [...el.querySelectorAll(".in")])).forEach(w => w.style.transform = "none"); }
+/* Position d'un élément dans la scène 1600 × 900 : [x, y, largeur] */
+function mesure(el) { const r = el.getBoundingClientRect(), s = ST.getBoundingClientRect();
+  return [(r.left + r.width / 2 - s.left) / SCALE, (r.top + r.height / 2 - s.top) / SCALE, r.width / SCALE]; }
+/* Caméra : zoom en échelle logarithmique (vitesse ressentie constante), le point visé glisse au centre */
+function camZoom(w, x, y, Zf, e) {
+  const z = Math.exp(Math.log(Zf) * e), g = (z - 1) / (Zf - 1), sx = lerp(x, 800, g), sy = lerp(y, 450, g);
+  w.style.transformOrigin = "0 0"; w.style.transform = `translate(${sx - x * z}px,${sy - y * z}px) scale(${z})`; return z;
+}
+/* La plongée : la caméra fonce dans le point pêche jusqu'à ce qu'il remplisse l'écran (couleur col) */
+function plonge(w, pt, pos, t, a, D, col) {
+  const p = REDUIT_V ? 0 : k(t, a, a + D);
+  if (p <= 0) { w.style.transform = "none"; w.style.filter = "none"; return 0; }
+  const z = camZoom(w, pos[0], pos[1], 1950 / pos[2], io(p));
+  pt.style.background = mixCol(PEACH, hex(col), k(p, .3, .85));
+  const v = Math.sin(Math.PI * p); w.style.filter = v > .25 ? `blur(${(4 * v / z).toFixed(3)}px)` : "none";
+  return p;
+}
+/* Début de scène : l'aplat plein écran (le point devenu géant) se resserre en panneau */
+function aplat(el, t, x, y, w, h, r, d = .85) {
+  const p = REDUIT_V ? 1 : ex(k(t, 0, d)), s = el.firstChild.style;
+  s.width = lerp(1600, w, p) + "px"; s.height = lerp(900, h, p) + "px"; s.borderRadius = lerp(0, r, p) + "px";
+  P(el, lerp(800, x, p), lerp(450, y, p)); return p;
+}
+/* Tracé : les traits d'un dessin SVG se dessinent l'un après l'autre */
+function trace(root, t, a, d = .55, pas = .07) {
+  if (!root._tr) { root._tr = [...root.querySelectorAll("path,rect,circle,line,polygon")];
+    root._tr.forEach(e => { const f = e.getAttribute("fill"); if (f && f !== "none") e._f = 1; else { e.setAttribute("pathLength", "1"); e.style.strokeDasharray = "1 1"; } }); }
+  root._tr.forEach((e, i) => { const q = io(k(t, a + i * pas, a + i * pas + d));
+    if (e._f) e.style.opacity = q > .85 ? 1 : 0; else { e.style.strokeDashoffset = 1 - q; e.style.opacity = q > 0 ? 1 : 0; } });
+}
+const FIELD = col => `<div class="v-field" style="background:${col}"></div>`;
+/* v3.1 — L'écran d'accueil de l'iPad : une appli par activité (couleur = panneau de l'activité) */
+const APPS = [["cube", "#DCF1E4"], ["robot", "#DCE9FB"], ["bulb", "#FAF0C8"], ["palette", "#E7E0FA"], ["clap", "#FADDE3"], ["plus", "#FDE5D3"]];
+const APP_POS = APPS.map((_, i) => [800 + (i % 3 - 1) * 215, i < 3 ? 338 : 562, 150]); /* [x, y, taille] dans la scène */
+function accueil(parent) { /* l'iPad 868 × 651 centré, écran blanc, 6 icônes */
+  const h = { w: E("", "full", parent) };
+  h.ip = E(`<div style="width:868px;height:651px;background:#0a0a0a;border-radius:84px;padding:34px;box-shadow:0 30px 70px rgba(10,10,10,.14)"><div style="width:100%;height:100%;background:#fff;border-radius:52px;display:flex;justify-content:center;padding-top:22px"><div class="v-bar" style="margin:0;align-self:flex-start"></div></div></div>`, "", h.w);
+  h.apps = APPS.map(([n, col]) => E(`<div style="width:150px;height:150px;border-radius:36px;background:${col};display:grid;place-items:center">${ICO(n, 92)}</div>`, "", h.w));
+  h.ico = h.apps.map(a => a.querySelector("svg")); P(h.ip, 800, 450);
+  h.apps.forEach((a, i) => P(a, APP_POS[i][0], APP_POS[i][1])); return h;
+}
+/* Ouvrir une appli : la caméra fonce dans l'icône jusqu'à ce qu'elle remplisse l'écran (son dessin s'efface) */
+function ouvre(w, pos, ico, t, a, D) {
+  const p = REDUIT_V ? 0 : k(t, a, a + D);
+  if (ico) ico.style.opacity = 1 - k(p, .05, .3);
+  if (p <= 0) { w.style.transform = "none"; w.style.filter = "none"; return 0; }
+  const z = camZoom(w, pos[0], pos[1], 1950 / pos[2], io(p));
+  const v = Math.sin(Math.PI * p); w.style.filter = v > .25 ? `blur(${(4 * v / z).toFixed(3)}px)` : "none"; return p;
+}
+const tape = (t, a) => 1 - .1 * Math.sin(Math.PI * k(t, a, a + .28)); /* le doigt touche l'icône */
+
+/* ===== 1. La mallette : les objets sortent et FORMENT l'iPad ===== */
+SCENES.push({ d: 10.8, m: "color",
+  mk() { const c = {}; c.w = E("", "full");
+    c.t1 = E(KT("Que cache cette mallette ?", 96), "", c.w);
+    c.t2 = E(KT("Tout ça… dans une [tablette] ?", 96), "", c.w);
+    c.glow = E(`<div style="width:980px;height:640px;border-radius:50%;background:radial-gradient(closest-side,rgba(250,199,117,.5),rgba(253,229,211,.32) 55%,rgba(255,255,255,0))"></div>`, "", c.w);
+    c.ip = E(IPAD(MALLETTE_OBJ), "", c.w); c.ipf = c.ip.firstChild; c.apps = [...c.ip.querySelectorAll(".v-app")];
+    c.ipf.style.background = "transparent"; c.ipf.firstChild.style.background = "transparent"; c.ip.querySelector(".v-bar").style.opacity = 0;
+    c.fr = E(sv("0 0 560 420", 560, 420, `<rect x="11" y="11" width="538" height="398" rx="43" fill="none" stroke="#0a0a0a" stroke-width="22"/>`), "", c.w);
+    c.om = E(OMBRE, "", c.w); c.arr = E(MAL_ARR, "", c.w); c.lid = c.arr.querySelector(".mal-lid");
+    c.o = MALLETTE_OBJ.slice(0, 6).map(([n, col]) => E(`<div style="width:140px;height:140px;border-radius:50%;background:${col};display:grid;place-items:center;box-shadow:0 12px 30px rgba(10,10,10,.08)">${ICO(n, 84)}</div>`, "", c.w));
+    c.av = E(MAL_AV, "", c.w); c.lat = [...c.av.querySelectorAll(".lat")];
     return c; },
   up(c, t) {
-    P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .8));
-    /* Où arrivent les objets : le centre de chaque case de l'iPad (mesuré une fois) */
-    if (!c.pos) { P(c.ip, 800, 500, { s: 1.15 }); const r = ST.getBoundingClientRect();
+    /* Les cases de l'iPad (mesurées une fois, caméra au repos) */
+    if (!c.pos) { c.w.style.transform = "none"; P(c.ip, 800, 500, { s: 1.15 }); const r = ST.getBoundingClientRect();
       c.pos = c.apps.map(a => { const b = a.getBoundingClientRect(); return [(b.left + b.width / 2 - r.left) / SCALE, (b.top + b.height / 2 - r.top) / SCALE, b.width / SCALE]; }); }
-    P(c.t1, 800, 105 + 30 * (1 - eo(k(t, .1, .6))), { o: eo(k(t, .1, .6)) * (1 - k(t, 4.9, 5.2)) });
-    /* 1. La mallette tombe (accélère), s'écrase un peu, rebondit */
-    const fp = k(t, 0, .55), land = k(t, .55, 1.05), out = k(t, 4.9, 5.5);
-    const y = lerp(-320, 560, fp * fp) - 26 * Math.sin(Math.PI * k(t, .7, 1.05)) + 300 * out * out;
+    P(c.t1, 800, 105); ktUp(c.t1, t, .15, 4.6);
+    /* La mallette tombe (accélère), s'écrase un peu, rebondit */
+    const fp = k(t, 0, .55), out = k(t, 4.9, 5.5);
+    const y = lerp(-320, 560, fp * fp) - 26 * Math.sin(Math.PI * k(t, .7, 1.05)) - 40 * Math.sin(Math.PI * k(t, 4.9, 5.1)) + 900 * ei(k(t, 5.0, 5.5));
     const sq = .13 * Math.sin(Math.PI * k(t, .55, .8)) - .04 * Math.sin(Math.PI * k(t, 1.05, 1.25)) + .03 * Math.sin(Math.PI * k(t, 1.05, 1.22));
-    const ant = .035 * Math.sin(Math.PI * k(t, 1.1, 1.35)); /* petit recul avant l'ouverture */
-    [c.arr, c.av].forEach(el => { P(el, 800, y, { o: 1 - out, s: 1.08 }); el.firstChild.style.transform = `scale(${1 + sq + ant * .5},${1 - sq - ant})`; });
+    const ant = .035 * Math.sin(Math.PI * k(t, 1.1, 1.35));
+    [c.arr, c.av].forEach(el => { P(el, 800, y, { o: out < 1 ? 1 : 0, s: 1.08 }); el.firstChild.style.transform = `scale(${1 + sq + ant * .5},${1 - sq - ant})`; });
     P(c.om, 800, 786, { s: 1.08 * lerp(.35, 1, fp * fp) - .1 * Math.sin(Math.PI * k(t, .7, 1.05)), o: (1 - out) * k(t, 0, .3) });
-    /* 2. Les fermoirs sautent, le couvercle s'ouvre sur sa charnière */
+    /* Les fermoirs sautent, le couvercle s'ouvre : une lumière chaude sort de la mallette */
     c.lat.forEach((l, j) => { const q = bk(k(t, 1.2 + j * .08, 1.45 + j * .08)); const x = j ? 339 : 119;
       l.setAttribute("transform", `translate(0 ${-10 * q}) rotate(${-22 * q} ${x} 104)`); });
     c.lid.style.transform = `rotateX(${-150 * bk(k(t, 1.45, 2.2))}deg)`;
-    /* 3. Les objets sortent en arc (100 ms d'écart), flottent, puis 4. volent jusque dans l'iPad */
-    const ip = ex(k(t, 5.0, 5.7)); P(c.ip, 800, lerp(1250, 500, ip), { s: 1.15 });
+    const gl = ex(k(t, 1.5, 2.3)) * (1 - ei(k(t, 4.7, 5.4)));
+    P(c.glow, 800, lerp(560, 420, gl), { s: lerp(.3, 1, gl) * (1 + .03 * Math.sin(t * 3)), o: gl });
+    /* Les objets jaillissent en arc, flottent, puis se rangent : ils deviennent les cases de l'iPad */
     c.o.forEach((el, j) => {
       const a = 1.95 + j * .1, p = eo(k(t, a, a + .75)), [X, Y] = ARC[j], CX = (800 + X) / 2, CY = Math.min(Y, 560) - 110;
       const bx = (1 - p) * (1 - p) * 800 + 2 * (1 - p) * p * CX + p * p * X, by = (1 - p) * (1 - p) * 590 + 2 * (1 - p) * p * CY + p * p * Y;
       const fl = 9 * Math.sin(t * 2.2 + j) * k(t, a + .75, a + 1.1);
-      const b = 5.6 + j * .12, f = eo(k(t, b, b + .5)), [tx, ty, tw] = c.pos[j];
-      P(el, lerp(bx, tx, f), lerp(by + fl, ty, f) - 80 * Math.sin(Math.PI * f), { s: lerp(lerp(.45, 1, bk(k(t, a, a + .75))), tw / 140, f), o: t > a ? (f < 1 ? 1 : 0) : 0, r: 8 * Math.sin(t * 2 + j) * (1 - f) * p }); });
-    c.apps.forEach((a, j) => { const at = j < 6 ? 6.1 + j * .12 : 6.9 + (j - 6) * .15, q = j < 6 ? (t >= at ? 1 : 0) : bk(k(t, at, at + .4));
-      a.style.opacity = q; a.style.transform = `scale(${j < 6 ? 1 + .12 * Math.sin(Math.PI * k(t, at, at + .3)) : q})`; });
-    P(c.t2, 800, 105 + 30 * (1 - eo(k(t, 7.2, 7.7))), { o: eo(k(t, 7.2, 7.7)) }); } });
+      const b = 5.5 + j * .1, f = ex(k(t, b, b + .55)), [tx, ty, tw] = c.pos[j];
+      el.firstChild.style.borderRadius = lerp(70, 26 * 140 / tw, io(k(t, b + .15, b + .55))) + "px";
+      P(el, lerp(bx, tx, f), lerp(by + fl, ty, f) - 70 * Math.sin(Math.PI * f), { s: lerp(lerp(.45, 1, bk(k(t, a, a + .75))), tw / 140, f), o: t > a ? (f < 1 ? 1 : 0) : 0, r: 8 * Math.sin(t * 2 + j) * (1 - f) * p }); });
+    /* La plongée dans l'écran : les cases s'écartent et passent à côté de la caméra */
+    const dv = REDUIT_V ? 0 : k(t, 9.8, 10.8), fly = ei(k(t, 9.8, 10.55));
+    P(c.ip, 800, 500, { s: 1.15 });
+    c.apps.forEach((a, j) => { const at = j < 6 ? 6.05 + j * .1 : 6.6 + (j - 6) * .14, q = j < 6 ? (t >= at ? 1 : 0) : bk(k(t, at, at + .4));
+      const dx = (c.pos[j][0] - 800) / 1.15, dy = (c.pos[j][1] - 500) / 1.15;
+      a.style.opacity = q; a.style.filter = fly > .05 ? `blur(${6 * fly}px)` : "none";
+      a.style.transform = `translate(${dx * 5 * fly}px,${dy * 5 * fly}px) scale(${(j < 6 ? 1 + .12 * Math.sin(Math.PI * k(t, at, at + .3)) : q) * (1 + 2 * fly)})`; });
+    /* Le cadre noir se trace autour des cases : l'iPad est né */
+    P(c.fr, 800, 500, { s: 1.15 }); trace(c.fr, t, 6.7, .7);
+    c.ipf.style.boxShadow = `0 30px 70px rgba(10,10,10,${.14 * k(t, 7.3, 7.8)})`;
+    P(c.t2, 800, 105); ktUp(c.t2, t, 7.45);
+    if (dv > 0) camZoom(c.w, 800, 500, 3.1, io(dv)); else c.w.style.transform = "none"; } });
 
-/* ===== Partie 2 : le 1:1 ===== */
+/* ===== 2. Le 1:1 : les chiffres tombent, le surlignage devient l'iPad ===== */
 chap("Le 1:1");
-/* Une seule scène qui évolue : « 1:1 » s'écrit, monte et rétrécit, « C'est quoi ? » arrive,
-   puis le surlignage pêche devient l'iPad (morph). */
 const TUILES = [["book", "#FDE5D3"], ["pencil", "#FAF0C8"], ["palette", "#FADDE3"], ["clap", "#DCE9FB"], ["cube", "#DCF1E4"], ["robot", "#E7E0FA"], ["mic", "#D3EFEC"], ["globe", "#FDE5D3"]];
 SCENES.push({ d: 11.5, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
-    c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
-    c.m = E(`<div class="v-morph"></div>`);
-    c.a = E(`<div class="v-h" style="font-size:360px">1</div>`); c.col = E(`<div class="v-h" style="font-size:360px;color:#F0997B">:</div>`); c.b = E(`<div class="v-h" style="font-size:360px">1</div>`);
-    c.q = E(SUB(`C’est quoi ?`)); c.cap = E(SUB(`Au Chêneux, chaque élève a [sa tablette] : un iPad.`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .6));
+  mk() { const c = {}; c.w = E("", "full");
+    c.ip = E(IPAD(TUILES), "", c.w); c.apps = [...c.ip.querySelectorAll(".v-app")];
+    c.m = E(`<div class="v-morph"></div>`, "", c.w);
+    c.a = E(`<div class="v-h" style="font-size:360px">1</div>`, "", c.w); c.col = E(`<div class="v-h" style="font-size:360px;color:#F0997B">:</div>`, "", c.w); c.b = E(`<div class="v-h" style="font-size:360px">1</div>`, "", c.w);
+    c.q = E(KT("C’est quoi ?", 81), "", c.w); c.cap = E(KT("Au Chêneux, chaque élève a sa tablette : un iPad.", 54), "", c.w); return c; },
+  up(c, t) {
+    /* « 1 », « : », « 1 » s'abattent sur l'écran (grand → net) ; la caméra encaisse le choc */
     const g = io(k(t, 3.0, 3.8)), S = lerp(1, .42, g), Y = lerp(420, 140, g);
-    const st = (el, x, a) => { const p = eo(k(t, a, a + .6)); P(el, 800 + (x - 800) * S, Y + 70 * (1 - p) * S, { o: p, s: S }); };
-    st(c.a, 610, 0); st(c.col, 800, .25); st(c.b, 990, .5);
+    let choc = 0; const sortie = ei(k(t, 10.5, 11.0));
+    const st = (el, x, a) => { const p = k(t, a, a + .26), e = p * p, im = t - a - .26;
+      if (im > 0) choc += 9 * Math.exp(-im * 14) * Math.sin(im * 60);
+      P(el, 800 + (x - 800) * S, Y - 320 * sortie, { o: p > 0 ? 1 : 0, s: S * lerp(2.6, 1, e) });
+      el.style.filter = p > 0 && p < 1 ? `blur(${(1 - e) * 10}px)` : "none"; };
+    st(c.a, 610, .1); st(c.col, 800, .55); st(c.b, 990, 1.0);
+    c.w.style.transform = `translate(0,${choc.toFixed(2)}px)`;
     /* Le surlignage : se dessine, suit le 1:1, puis devient l'iPad */
-    const w = eo(k(t, .9, 1.6)), m = io(k(t, 6.0, 7.0)), done = t >= 7.0;
+    const w = eo(k(t, 5.85, 6.3)), m = io(k(t, 6.4, 7.2)), done = t >= 7.2;
     const mf = c.m.firstChild;
     mf.style.width = lerp(600 * w, 560, m) + "px"; mf.style.height = lerp(110, 420, m) + "px"; mf.style.borderRadius = lerp(14, 54, m) + "px";
-    /* Le pêche s'éclaircit en écran blanc pendant que le cadre noir de l'iPad pousse autour */
     mf.style.background = mixCol([253, 229, 211], [255, 255, 255], k(m, .45, 1)); mf.style.border = `${22 * eo(k(m, .2, .85))}px solid #0a0a0a`;
     mf.style.boxShadow = `0 30px 70px rgba(10,10,10,${.14 * m})`;
     P(c.m, 800, lerp(Y + 100 * S, 470, m), { s: lerp(S, 1, m), o: w > 0 && !done ? 1 : 0 });
     P(c.ip, 800, 470, { o: done ? 1 : 0 });
-    c.apps.forEach((a, i) => { const q = bk(k(t, 7.0 + i * .1, 7.4 + i * .1)); a.style.transform = `scale(${q})`; a.style.opacity = k(t, 7.0 + i * .1, 7.2 + i * .1); });
-    const qo = 1 - k(t, 5.85, 6.15); P(c.q, 800, 470 - 30 * k(t, 5.85, 6.15), { s: 1.5 }); subUp(c.q, t, 3.4, qo);
-    P(c.cap, 800, 790); subUp(c.cap, t, 7.3); } });
+    c.apps.forEach((a, i) => { const q = bk(k(t, 7.2 + i * .08, 7.6 + i * .08)); a.style.transform = `scale(${q})`; a.style.opacity = q > 0 ? 1 : 0; });
+    P(c.q, 800, 470); ktUp(c.q, t, 3.4, 5.75);
+    P(c.cap, 800, 790); ktUp(c.cap, t, 7.5, 10.6, .04); } });
 
+/* ===== 3. Un outil pour apprendre : les bulles tournent en 3D autour de l'iPad ===== */
 const BULLES = ["book", "bulb", "pencil", "numbers", "globe", "speech"];
-SCENES.push({ d: 6.2, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.title = E(`<div class="v-h" style="font-size:104px">Un outil pour <span class="v-mk">apprendre</span>.</div>`);
-    c.ip = E(IPAD(TUILES)); c.b = BULLES.map((n, i) => E(`<div class="v-bulle" style="background:${PAS[i % 7]}">${ICO(n, 76)}</div>`));
-    c.cap = E(SUB(`À l’école, la tablette aide [chaque élève] à apprendre.`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); P(c.title, 800, 125, { o: k(t, .2, .6), s: lerp(.96, 1, eo(k(t, .2, .8))) });
-    /* Morph : l'iPad de la scène précédente rétrécit sur place */
-    const z = io(k(t, .35, 1.1)); P(c.ip, 800, lerp(470, 465, z), { s: lerp(1, .58, z) });
-    c.b.forEach((b, i) => { const ang = (i / 6) * Math.PI * 2 + t * .35; const R = 330 * eo(k(t, .7 + i * .1, 1.5 + i * .1));
-      P(b, 800 + Math.cos(ang) * R * 1.3, 465 + Math.sin(ang) * R * .62, { s: eo(k(t, .7 + i * .1, 1.2 + i * .1)) }); });
-    P(c.cap, 800, 815); subUp(c.cap, t, 1.8); } });
+SCENES.push({ d: 6.8, m: "color",
+  mk() { const c = {}; c.title = E(KT("Un outil pour apprendre.", 104));
+    c.ip = E(IPAD(TUILES)); c.ip.style.zIndex = 2;
+    c.b = BULLES.map((n, i) => E(`<div class="v-bulle" style="background:${PAS[i % 7]}">${ICO(n, 76)}</div>`));
+    c.cap = E(KT("À l’école, la tablette aide [chaque élève] à progresser.", 54)); return c; },
+  up(c, t) { P(c.title, 800, 125); ktUp(c.title, t, .25, 5.3);
+    const z = io(k(t, .2, 1.0)), fl = ei(k(t, 6.05, 6.8));
+    P(c.ip, 800, lerp(470, 465, z), { s: lerp(1, .58, z) });
+    c.ip.style.transform += ` perspective(1400px) rotateY(${90 * fl}deg)`;
+    const aspi = ei(k(t, 5.35, 6.0));
+    c.b.forEach((b, i) => { const ang = (i / 6) * Math.PI * 2 + t * .55, ap = ex(k(t, .55 + i * .08, 1.5 + i * .08));
+      const R = 330 * ap * (1 - aspi), dz = Math.sin(ang);
+      P(b, 800 + Math.cos(ang) * R * 1.35, 465 + dz * R * .45, { s: (.74 + .34 * (dz + 1) / 2) * ex(k(t, .55 + i * .08, 1.1 + i * .08)) * (1 - aspi) });
+      b.style.zIndex = dz > 0 ? 3 : 1; b.style.filter = dz < -.25 ? `blur(${((-dz - .25) * 3.2).toFixed(2)}px)` : "none"; });
+    P(c.cap, 800, 815); ktUp(c.cap, t, 1.7, 5.3, .05); } });
 
-const OBJ = [["laptop", "#DCE9FB", "Développer les compétences numériques"], ["shuffle", "#FADDE3", "Varier les façons d’apprendre"], ["target", "#DCF1E4", "Un outil adapté à chaque élève"]];
+/* ===== 4. Nos 3 objectifs : l'iPad se retourne en trois cartes, qui se replient ensuite en iPad ===== */
+const OBJ = [["laptop", "#DCE9FB", "Développer les compétences numériques"], ["shuffle", "#FADDE3", "Varier les approches en classe"], ["target", "#DCF1E4", "Un outil adapté à chaque élève"]];
 SCENES.push({ d: 9.8, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.h = E(`<div class="v-h" style="font-size:104px">Nos 3 objectifs<span style="color:#F0997B">.</span></div>`);
-    c.cards = OBJ.map(([n, col, t], i) => E(`<div class="v-card"><div class="v-art" style="background:${col}">${ICO(n, 110)}</div><div class="v-body"><div class="v-num">0${i + 1}</div><div class="v-t">${t}</div></div></div>`)); return c; },
-  up(c, t) { P(c.bg, 800, 450); P(c.h, 800, 115, { o: k(t, 0, .4) });
-    c.cards.forEach((el, i) => { const a = .4 + i * 2.3, on = (t >= a && t < a + 2.3) || (i === 2 && t >= a);
-      const p = ex(k(t, a, a + .5)); el.firstChild.classList.toggle("on", on);
-      P(el, 310 + i * 490, 530 + 60 * (1 - p), { o: p, s: on ? 1.03 : .97 }); }); } });
+  mk() { const c = {}; c.w = E("", "full"); c.h = E(KT("Nos 3 objectifs.", 104), "", c.w);
+    c.cards = OBJ.map(([n, col, t], i) => E(`<div class="v-card"><div class="v-art" style="background:${col}">${ICO(n, 110)}</div><div class="v-body"><div class="v-num">0${i + 1}</div><div class="v-t">${t}</div></div></div>`, "", c.w));
+    c.ico = c.cards.map(el => el.querySelector("svg")); return c; },
+  up(c, t) { P(c.h, 800, 115);
+    ktUp(c.h, t, .35, 8.55);
+    const flip = eo(k(t, 0, .45)), back = io(k(t, 8.75, 9.4)), fold = ei(k(t, 9.3, 9.78));
+    c.cards.forEach((el, i) => { const a = .3 + i * .14, p = ex(k(t, a, a + .8)), lit = 1.7 + i * 2.3;
+      const on = (t >= lit && t < lit + 2.3) || (i === 2 && t >= lit);
+      el.firstChild.classList.toggle("on", on);
+      const lift = on ? eo(k(t, lit, lit + .35)) : 0;
+      P(el, lerp(lerp(800, 310 + i * 490, p), 800, back), lerp(lerp(465, 530, p) - 70 * Math.sin(Math.PI * p) - 14 * lift, 430, back), { s: lerp(lerp(.45, .97 + .06 * lift, p), .45, back), r: (i - 1) * 5 * Math.sin(Math.PI * p) * (1 - back) });
+      el.style.transform += ` perspective(1400px) rotateY(${-90 * (1 - flip) + 90 * fold}deg)`;
+      el.firstChild.style.boxShadow = `0 ${20 + 20 * lift}px ${40 + 20 * lift}px rgba(10,10,10,${.05 + .07 * lift})`;
+      trace(c.ico[i], t, a + .7, .5, .08); }); } });
 
-SCENES.push({ d: 7, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
-    c.a = E(`<div class="v-h" style="font-size:130px">1 élève</div>`); c.b = E(`<div class="v-h" style="font-size:130px">1 tablette</div>`);
-    c.n = E(`<div class="v-h" style="font-size:270px"><span class="v-mk">1</span></div>`); c.l = E(`<div class="v-h" style="font-size:100px">façons d’apprendre<span style="color:#F0997B">.</span></div>`);
-    c.cf = confetti(40, 800, 430); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t); const up = eo(k(t, 1.9, 2.6));
-    const pa = eo(k(t, 0, .5)), pb = eo(k(t, .6, 1.1));
-    P(c.a, lerp(450, 560, up), lerp(430, 150, up) + 50 * (1 - pa), { s: lerp(1, .6, up), o: pa });
-    P(c.b, lerp(1150, 1040, up), lerp(430, 150, up) + 50 * (1 - pb), { s: lerp(1, .6, up), o: pb });
-    const cnt = Math.round(lerp(1, 1000, eo(k(t, 2.5, 4.0)))); c.n.firstChild.firstChild.textContent = cnt >= 1000 ? "1 000" : String(cnt);
-    P(c.n, 800, 430, { o: k(t, 2.3, 2.6), s: lerp(.9, 1, eo(k(t, 2.3, 2.8))) });
-    const pl = eo(k(t, 4.0, 4.5)); P(c.l, 800, 680 + 40 * (1 - pl), { o: pl });
-    confUp(c.cf, t, 4.0); } });
+/* ===== 5. 1 élève, 1 tablette… 1 001 façons : les applis de l'iPad se multiplient et dessinent « 1 001 » ===== */
+const GRILLE = 9; /* pas de la mosaïque d'icônes (px) */
+let CIBLES = null, SPR = null;
+function cibles1001() {
+  if (CIBLES) return CIBLES;
+  const cv = document.createElement("canvas"); cv.width = 1600; cv.height = 900; const g = cv.getContext("2d");
+  g.font = "700 340px Figtree, Arial, sans-serif"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("1 001", 800, 430);
+  const d = g.getImageData(0, 0, 1600, 900).data, pts = [];
+  for (let y = 0; y < 900; y += GRILLE) for (let x = 0; x < 1600; x += GRILLE) if (d[(y * 1600 + x) * 4 + 3] > 140) pts.push([x, y]);
+  const out = []; for (let i = 0; i < 1001; i++) out.push(pts[Math.floor(i * pts.length / 1001)]);
+  out.sort((a, b) => a[0] - b[0]);
+  const ok = !document.fonts || document.fonts.check("700 340px Figtree"); if (ok) CIBLES = out; return out;
+}
+/* Une petite icône d'appli dessinée une fois (carré arrondi + rond blanc), puis copiée 1 001 fois */
+function sprites() {
+  if (SPR) return SPR;
+  return SPR = ["#F0997B", "#FAC775", "#ED93B1", "#85B7EB", "#5DCAA5", "#AFA9EC", "#9FE1CB", "#F0997B", "#0a0a0a"].map(col => {
+    const cv = document.createElement("canvas"); cv.width = cv.height = 48; const g = cv.getContext("2d");
+    g.fillStyle = col; g.beginPath(); if (g.roundRect) g.roundRect(2, 2, 44, 44, 12); else g.rect(2, 2, 44, 44); g.fill();
+    g.fillStyle = "rgba(255,255,255,.8)"; g.beginPath(); g.arc(24, 24, 7, 0, 7); g.fill(); return cv; });
+}
+SCENES.push({ d: 8.6, m: "color",
+  mk() { const c = {}; c.ip = E(IPAD(TUILES)); c.apps = [...c.ip.querySelectorAll(".v-app")];
+    c.cv = E(`<canvas width="1600" height="900" style="width:1600px;height:900px"></canvas>`); c.g = c.cv.firstChild.getContext("2d");
+    c.a = E(KT("1 élève", 130)); c.b = E(KT("1 tablette", 130)); c.l = E(KT("façons d’apprendre.", 100));
+    const T = cibles1001(); c.spr = sprites();
+    c.px = T.map((p, i) => ({ j: i % 8, tx: p[0], ty: p[1], c: i % 3 === 0 ? 8 : i % 8, sw: (Math.random() < .5 ? -1 : 1) * (80 + Math.random() * 160), a: 2.9 + i * .0006 }));
+    return c; },
+  up(c, t) {
+    /* La petite tablette arrive de profil (raccord sur les cartes repliées), bat comme un cœur, puis s'ouvre */
+    if (!c.pos) { P(c.ip, 800, 430, { s: .36 }); c.pos = c.apps.map(mesure); }
+    const fl = REDUIT_V ? 1 : eo(k(t, 0, .5)), pu = .25 * Math.sin(Math.PI * k(t, 2.5, 2.85)), bo = ei(k(t, 2.9, 3.1));
+    P(c.ip, 800, 430, { s: .36 * (1 + pu) * (1 - bo), o: bo < 1 ? 1 : 0 });
+    c.ip.style.transform += ` perspective(1400px) rotateY(${-90 * (1 - fl)}deg)`;
+    const up = io(k(t, 2.2, 2.8));
+    P(c.a, lerp(400, 560, up), lerp(430, 150, up), { s: lerp(1, .6, up) }); ktUp(c.a, t, .5, 7.45);
+    P(c.b, lerp(1200, 1040, up), lerp(430, 150, up), { s: lerp(1, .6, up) }); ktUp(c.b, t, .8, 7.5);
+    /* Les 8 applis se multiplient : 1 001 icônes dessinent « 1 001 », puis sont aspirées par le curseur de la suite */
+    const g = c.g, asp = 7.75, RT = GRILLE * .42; g.clearRect(0, 0, 1600, 900);
+    c.px.forEach((q, i) => { if (t < q.a) return; const f = ex(k(t, q.a, q.a + .95)), [sx, sy, sw0] = c.pos[q.j];
+      const sc = (i / 1001) * .5, h = io(k(t, asp + sc, asp + sc + .35)); if (h >= 1) return;
+      const x = lerp(lerp(sx, q.tx, f) + q.sw * Math.sin(Math.PI * f) * .6, 805, h), y = lerp(lerp(sy, q.ty, f) - q.sw * Math.sin(Math.PI * f), 480, h);
+      const r = lerp(sw0 / 2, RT, ex(k(t, q.a, q.a + .55))) * (1 - h * .85);
+      g.drawImage(c.spr[q.c], x - r, y - r, 2 * r, 2 * r); });
+    P(c.cv, 800, 450);
+    P(c.l, 800, 690); ktUp(c.l, t, 4.4, 7.4); } });
 
-/* ===== Partie 3 : la bande-annonce ===== */
+/* ===== 6. « Au Chêneux, on fait classe autrement… » s'écrit sur l'écran de l'iPad : la caméra recule, l'écran d'accueil apparaît ===== */
 chap("La bande-annonce");
-const TXT_TAPE = "Au Chêneux,\non apprend autrement…", D_TAPE = 4.2;
-SCENES.push({ d: D_TAPE, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.t = E(`<div class="v-h" style="font-size:120px;text-align:center;line-height:1.08"><span></span><i class="v-cur"></i></div>`); return c; },
-  up(c, t) { P(c.bg, 800, 450); const n = Math.floor(k(t, .2, 1.8) * TXT_TAPE.length);
-    c.t.firstChild.firstChild.innerHTML = TXT_TAPE.slice(0, n).replace("\n", "<br>");
-    c.t.querySelector(".v-cur").style.opacity = Math.floor(t * 2.4) % 2 ? 0 : 1;
-    P(c.t, 800, 480); } });
+const TXT_TAPE = "Au Chêneux,\non fait classe autrement";
+SCENES.push({ d: 7.2, m: "color",
+  mk() { const c = {}; c.h = accueil(ST);
+    c.t = E(`<div class="v-h" style="font-size:112px;text-align:center;line-height:1.08"><span style="display:inline-block;overflow:hidden;vertical-align:top;padding:.1em .1em .17em;margin:-.1em -.1em -.17em"><span class="in" style="display:inline-block"><span></span><span class="pt3"><i></i><i></i></span><i class="v-cur"></i></span></span></div>`);
+    c.in = c.t.querySelector(".in"); c.txt = c.in.firstChild;
+    c.cur = c.t.querySelector(".v-cur"); c.d3 = [...c.t.querySelectorAll(".pt3 i")]; return c; },
+  up(c, t) { const n = Math.floor(k(t, .2, 1.7) * TXT_TAPE.length);
+    c.txt.innerHTML = TXT_TAPE.slice(0, n).replace("\n", "<br>");
+    /* Deux points noirs tombent, puis le curseur se replie en troisième point (pêche) : « … » */
+    c.d3.forEach((d, i) => { const q = bk(k(t, 1.9 + i * .2, 2.2 + i * .2)); d.style.transform = `scale(${q})`; d.style.display = t >= 1.9 + i * .2 ? "" : "none"; });
+    const m = bk(k(t, 2.6, 3.05)), cs = c.cur.style;
+    cs.width = lerp(12, 17, m) + "px"; cs.height = lerp(92, 17, m) + "px"; cs.borderRadius = lerp(4, 9, m) + "px";
+    cs.marginLeft = lerp(10, 7, m) + "px"; cs.verticalAlign = lerp(-5, 0, m) + "px";
+    cs.opacity = t > 2.3 || Math.floor(t * 2.4) % 2 === 0 ? 1 : 0;
+    P(c.t, 800, 480);
+    c.in.style.transform = `translateY(${(-145 * ei(k(t, 3.6, 3.95))).toFixed(2)}%)`;
+    /* La caméra recule : on écrivait sur l'écran de l'iPad. Les 6 applis des activités apparaissent */
+    const e = REDUIT_V ? (t < 3.95 ? 1 : 0) : 1 - io(k(t, 3.95, 4.85));
+    if (t < 6.35) { c.h.w.style.filter = "none"; if (e > 0) camZoom(c.h.w, 800, 450, 2.4, e); else c.h.w.style.transform = "none"; }
+    c.h.apps.forEach((a, i) => { const at = 4.75 + i * .08, q = bk(k(t, at, at + .4));
+      P(a, APP_POS[i][0], APP_POS[i][1], { s: q * (i === 0 ? tape(t, 6.05) : 1), o: q > 0 ? 1 : 0 }); trace(c.h.ico[i], t, at + .12, .4, .05); });
+    /* On touche Minecraft : l'appli s'ouvre */
+    if (t >= 6.35) ouvre(c.h.w, APP_POS[0], c.h.ico[0], t, 6.35, .85); } });
 
-/* Poussée latérale : chaque activité est une « page » (texte à gauche, dessin à droite).
-   Le texte de la page suivante arrive de la droite et pousse le dessin précédent hors du cadre. */
-const PAGE_TAPE = { mk(pg) { return { t: E(`<div class="v-h" style="font-size:120px;text-align:center;line-height:1.08">${TXT_TAPE.replace("\n", "<br>")}<i class="v-cur" style="opacity:0"></i></div>`, "", pg) }; },
-  up(c) { P(c.t, 800, 480); } };
-function pageAct(title, tag, col, ill) {
-  const fin = /…$/.test(title) ? "" : `<span style="color:#F0997B">.</span>`;
-  return { mk(pg) { const c = {}; c.pan = E(`<div class="v-pan" style="background:${col}"></div>`, "", pg); c.box = E("", "ill", pg); c.i = ill.mk(c.box);
-      c.txt = E(`<div style="width:700px"><div class="v-h" style="font-size:100px;white-space:normal;line-height:1">${title}${fin}</div><div class="v-tag" style="margin-top:40px">${tag}</div></div>`, "", pg);
-      c.tag = c.txt.querySelector(".v-tag"); return c; },
-    up(c, t, lag = 0, lagTag = 0) { P(c.txt, 480, 450); c.tag.style.transform = `translateX(${lagTag}px)`;
-      P(c.pan, 1160 + lag, 450); P(c.box, 1160 + lag, 450); ill.up(c.i, t); } };
+/* ===== 7. Les activités : chaque appli s'ouvre (l'icône devient le panneau), puis se referme dans son icône ===== */
+function activite(title, tag, i, d, ill) {
+  const col = ACT_COL[i], der = i === APPS.length - 1;
+  SCENES.push({ d, m: "color",
+    mk() { const c = {}; c.h = accueil(ST);
+      c.win = E(`<div style="width:1600px;height:900px;overflow:hidden;background:#fff;position:relative"></div>`);
+      c.w = E("", "full", c.win.firstChild); c.f = E(FIELD(col), "", c.w); c.box = E("", "ill", c.w); c.i = ill.mk(c.box);
+      c.col = E(`<div style="width:700px">${KT(title, 100, { align: "left", css: "line-height:1.02" })}<div style="height:36px"></div>${KT(tag, 44, { align: "left", plain: true, css: "font-weight:400;letter-spacing:-.015em;color:#3c3c3c;line-height:1.3" })}</div>`, "", c.w);
+      [c.ti, c.tg] = c.col.querySelectorAll(".kt"); return c; },
+    up(c, t) {
+      /* L'écran plein de la couleur (l'icône ouverte) se resserre en panneau */
+      P(c.col, 480, 450);
+      aplat(c.f, t, 1160, 450, 640, 640, 56);
+      const bp = ex(k(t, .3, 1.0)); P(c.box, 1160, 450, { s: lerp(.55, 1, bp), o: t > .3 ? 1 : 0 }); ill.up(c.i, t - .45);
+      ktUp(c.ti, t, .3); ktUp(c.tg, t, .75, 99, .045);
+      /* L'activité se referme dans son icône (comme une appli) : l'écran d'accueil réapparaît */
+      const a = der ? d - 1.3 : d - 1.75, cl = REDUIT_V ? 0 : io(k(t, a, a + .6)), [ix, iy, iw] = APP_POS[i];
+      const W = lerp(1600, iw, cl), H = lerp(900, iw, cl), wf = c.win.firstChild.style, s = W / 1600;
+      wf.width = W + "px"; wf.height = H + "px"; wf.borderRadius = lerp(0, 36, cl) + "px";
+      wf.background = mixCol([255, 255, 255], hex(col), k(cl, .15, .6));
+      c.w.style.transformOrigin = "0 0"; c.w.style.transform = cl > 0 ? `translate(${(W - 1600 * s) / 2}px,${(H - 900 * s) / 2}px) scale(${s})` : "none";
+      c.w.style.opacity = 1 - k(cl, .3, .75);
+      P(c.win, lerp(800, ix, cl), lerp(450, iy, cl), { o: cl < 1 ? 1 : 0 });
+      c.h.apps.forEach((el, j) => P(el, APP_POS[j][0], APP_POS[j][1], { o: j !== i || cl >= 1 ? 1 : 0, s: j === i + 1 ? tape(t, d - 1.1) : 1 }));
+      trace(c.h.ico[i], t, a + .6, .35, .05);
+      /* On touche l'appli suivante : elle s'ouvre */
+      if (!der) ouvre(c.h.w, APP_POS[i + 1], c.h.ico[i + 1], t, d - .85, .85); } });
 }
-let pagePrec = PAGE_TAPE, dPrec = D_TAPE;
-function trailer(n, title, tag, col, d, ill) {
-  const pp = pagePrec, pd = dPrec, pg = pageAct(title, tag, col, ill); pagePrec = pg; dPrec = d;
-  SCENES.push({ d, m: "color", tr: "push",
-    mk() { const c = { bg: E(WHITE) }; c.p0 = E("", "full"); c.c0 = pp.mk(c.p0); c.p1 = E("", "full"); c.c1 = pg.mk(c.p1); return c; },
-    up(c, t) { P(c.bg, 800, 450);
-      const p = REDUIT_V ? 1 : io(k(t, 0, .85)), p2 = REDUIT_V ? 1 : io(k(t, .05, .9)), p3 = REDUIT_V ? 1 : io(k(t, .1, .95));
-      c.p0.style.visibility = p < 1 ? "" : "hidden"; if (p < 1) { P(c.p0, 800 - 1600 * p, 450); pp.up(c.c0, pd + t); }
-      P(c.p1, 800 + 1600 * (1 - p), 450); pg.up(c.c1, t, 1600 * (p - p3), 1600 * (p - p2)); } });
-}
-trailer("01", "Minecraft", "Construire ensemble.\nRésoudre des défis.\nApprendre en jouant.", "#DCF1E4", 5.2, {
+const ACT_COL = ["#DCF1E4", "#DCE9FB", "#FAF0C8", "#E7E0FA", "#FADDE3", "#FDE5D3", "#FFFFFF"];
+activite("Minecraft.", "Construire ensemble.\nRésoudre des défis.\nDécouvrir en jouant.", 0, 6.0, {
   mk(box) { const L = [[0, 0, 0], [1, 0, 0], [0, 1, 0], [1, 1, 0], [0, 0, 1], [1, 0, 1], [0, 1, 1], [0, 0, 2]];
     const draw = L.map((p, i) => ({ p, i })).sort((a, b) => (a.p[0] + a.p[1] + a.p[2]) - (b.p[0] + b.p[1] + b.p[2]) || a.p[2] - b.p[2]);
     const cols = [["#97C459", "#BA7517", "#8F5A14"], ["#CDD5DF", "#AAB4C0", "#8C97A5"], ["#9FE1CB", "#5DCAA5", "#1D9E75"]];
     const c = { cubes: [] }; draw.forEach(({ p, i }) => { const cc = cols[i === 7 ? 2 : (i === 3 || i === 5) ? 1 : 0]; c.cubes.push({ el: E(cube(...cc), "", box), p, i }); }); return c; },
-  up(c, t) { c.cubes.forEach(({ el, p, i }) => { const a = i ? .3 + i * .3 : -1, q = eo(k(t, a, a + .4)); const x = 300 + (p[0] - p[1]) * 60, y = 330 + (p[0] + p[1]) * 34 - p[2] * 70;
-    P(el, x, lerp(y - 260, y, q), { o: k(t, a, a + .15) }); }); } });
-trailer("02", "Robotique", "Programmer un robot.\nTester, se tromper,\nrecommencer !", "#DCE9FB", 5.0, {
+  up(c, t) { c.cubes.forEach(({ el, p, i }) => { const a = .1 + i * .26, q = k(t, a, a + .32); const x = 300 + (p[0] - p[1]) * 60, y = 330 + (p[0] + p[1]) * 34 - p[2] * 70;
+    const sq = .12 * Math.sin(Math.PI * k(t, a + .32, a + .5));
+    P(el, x, lerp(y - 300, y, q * q), { o: t > a ? 1 : 0 }); el.firstChild.style.transform = `scale(${1 + sq},${1 - sq})`; el.firstChild.style.transformOrigin = "50% 100%"; }); } });
+activite("Robotique.", "Programmer un robot.\nTester, se tromper,\nrecommencer !", 1, 5.8, {
   mk(box) { const c = {}; c.g = E(`<div class="v-grille"></div>`, "", box);
     c.path = [[0, 3], [0, 1], [2, 1], [2, 0], [3, 0]]; c.dots = [];
     for (let i = 0; i < 9; i++) c.dots.push(E("", "v-pt", box)); c.star = E(STAR(90), "", box); c.r = E(ROBOT, "", box); return c; },
-  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .6, 3.2) * segs;
+  up(c, t) { P(c.g, 300, 300); const cx = i => 135 + i * 110, segs = c.path.length - 1, p = k(t, .4, 3.0) * segs;
     const sI = Math.min(segs - 1, Math.floor(p)), f = eo(p - sI), A = c.path[sI], B = c.path[sI + 1];
     P(c.r, lerp(cx(A[0]), cx(B[0]), f), lerp(cx(A[1]), cx(B[1]), f), { r: Math.sin(t * 8) * 3 });
     c.dots.forEach((d, i) => { const q = i / 8 * segs; const j = Math.min(segs - 1, Math.floor(q)), g = q - j, a = c.path[j], b = c.path[j + 1];
-      P(d, lerp(cx(a[0]), cx(b[0]), g), lerp(cx(a[1]), cx(b[1]), g), { o: q < p - .15 ? 1 : 0 }); });
-    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 3.2, 3.8)), r: 12 * Math.sin(t * 2) }); } });
-trailer("03", "Intelligence collective", "Penser à plusieurs\nsur un même tableau Freeform.\nChaque idée compte.", "#FAF0C8", 5.6, {
+      P(d, lerp(cx(a[0]), cx(b[0]), g), lerp(cx(a[1]), cx(b[1]), g), { o: q < p - .15 ? 1 : 0, s: bk(k(p - q, .15, .5)) }); });
+    P(c.star, cx(3), cx(0), { s: .9 + .35 * Math.sin(Math.PI * k(t, 3.0, 3.6)), r: 12 * Math.sin(t * 2) }); } });
+activite("Intelligence\ncollective.", "Penser à plusieurs\nsur un même tableau Freeform.\nChaque idée compte.", 2, 6.4, {
   mk(box) { const N = [[150, 150, "#FAF0C8", "Idée !"], [440, 130, "#FADDE3", "Et si… ?"], [300, 320, "#DCE9FB", "On essaie ?"], [150, 470, "#DCF1E4", "Moi aussi !"], [450, 470, "#FDE5D3", "Bravo !"]];
     const Ls = [[0, 2], [1, 2], [2, 3], [2, 4], [0, 1]];
     const c = { N }; c.board = E(`<div class="v-board"></div>`, "", box);
-    c.svg = E(sv("0 0 600 600", 600, 600, Ls.map(([a, b]) => `<line x1="${N[a][0]}" y1="${N[a][1]}" x2="${N[b][0]}" y2="${N[b][1]}" stroke="#737373" stroke-width="5" stroke-linecap="round" stroke-dasharray="400" stroke-dashoffset="400"/>`).join("")), "", box);
-    c.lines = [...c.svg.querySelectorAll("line")]; c.notes = N.map(n => E(`<div class="v-note" style="background:${n[2]}">${n[3]}</div>`, "", box)); return c; },
+    c.svg = E(sv("0 0 600 600", 600, 600, Ls.map(([a, b]) => `<line x1="${N[a][0]}" y1="${N[a][1]}" x2="${N[b][0]}" y2="${N[b][1]}" stroke="#737373" stroke-width="5" stroke-linecap="round"/>`).join("")), "", box);
+    c.notes = N.map(n => E(`<div class="v-note" style="background:${n[2]}">${n[3]}</div>`, "", box)); return c; },
   up(c, t) { P(c.board, 300, 300); P(c.svg, 300, 300);
-    c.notes.forEach((el, i) => { const a = .5 + i * .3, q = eo(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1] + 30 * (1 - q), { o: q, r: i % 2 ? 3 : -3 }); });
-    c.lines.forEach((l, i) => l.setAttribute("stroke-dashoffset", 400 * (1 - eo(k(t, 2.2 + i * .2, 2.8 + i * .2))))); } });
-trailer("04", "Canva", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", "#E7E0FA", 4.8, {
+    c.notes.forEach((el, i) => { const a = .3 + i * .28, q = bk(k(t, a, a + .4)); P(el, c.N[i][0], c.N[i][1], { o: t > a ? 1 : 0, s: lerp(1.4, 1, q), r: lerp(i % 2 ? 14 : -14, i % 2 ? 3 : -3, q) }); });
+    trace(c.svg, t, 1.9, .5, .18); } });
+activite("Canva.", "Créer des affiches.\nOser les couleurs.\nMontrer son talent.", 3, 5.6, {
   mk(box) { const c = {}; c.p = E(`<div class="v-poster"></div>`, "", box);
     c.parts = [`<div style="width:300px;height:80px;border-radius:16px;background:#AFA9EC"></div>`, `<div style="width:170px;height:170px;border-radius:50%;background:#9FE1CB"></div>`,
       STAR(110), `<div style="width:280px;height:26px;border-radius:13px;background:#0a0a0a"></div>`, `<div style="width:200px;height:26px;border-radius:13px;background:#DCDCDC"></div>`].map(h => E(h, "", box));
     c.sw = ["#F0997B", "#FAC775", "#9FE1CB", "#AFA9EC"].map(col => E(`<div class="v-sw" style="background:${col}"></div>`, "", box)); c.hand = E(CURSEUR, "", box); return c; },
   up(c, t) { P(c.p, 270, 300, { r: -2 }); const pos = [[270, 120], [210, 270], [370, 250], [270, 420], [240, 470]];
-    c.parts.forEach((el, i) => { const a = .6 + i * .45, q = eo(k(t, a, a + .35)); P(el, pos[i][0], pos[i][1], { s: lerp(.6, 1, q), o: q, r: -2 }); });
-    c.sw.forEach((el, i) => P(el, 545, 140 + i * 100));
-    const hp = (t * 1.1) % 1, step = Math.floor(t * 1.1) % 4; P(c.hand, lerp(560, 300, eo(hp)), lerp(160 + step * 100, 330, eo(hp))); } });
-trailer("05", "Réalisation de vidéos", "Écrire, filmer, monter :\nraconter ses histoires.", "#FADDE3", 4.8, {
-  mk(box) { const c = {}; c.c = E(CLAP, "", box); c.arm = c.c.querySelector(".arm"); c.act = E(`<div class="v-h" style="font-size:90px"><span class="v-mk">Action !</span></div>`, "", box);
+    c.parts.forEach((el, i) => { const a = .4 + i * .42, q = bk(k(t, a, a + .4)); P(el, pos[i][0], pos[i][1], { s: q, o: t > a ? 1 : 0, r: -2 }); });
+    c.sw.forEach((el, i) => P(el, 545, 140 + i * 100, { s: bk(k(t, .1 + i * .07, .45 + i * .07)) }));
+    const hp = (Math.max(0, t) * 1.1) % 1, step = Math.floor(Math.max(0, t) * 1.1) % 4; P(c.hand, lerp(560, 300, eo(hp)), lerp(160 + step * 100, 330, eo(hp))); } });
+activite("Réalisation\nde vidéos.", "Écrire, filmer, monter :\nraconter ses histoires.", 4, 5.6, {
+  mk(box) { const c = {}; c.c = E(CLAP, "", box); c.arm = c.c.querySelector(".arm"); c.act = E(KT("Action !", 90), "", box);
     c.rec = E(`<div class="v-rec"><i></i>REC</div>`, "", box); return c; },
-  up(c, t) { P(c.c, 300, 340, { r: -3 }); const close = eo(k(t, 1.0, 1.25)); c.arm.setAttribute("transform", `rotate(${lerp(-26, 0, close)} 30 76)`);
-    P(c.act, 300, 95, { o: k(t, 1.3, 1.6), s: lerp(.9, 1, eo(k(t, 1.3, 1.7))) });
-    c.rec.querySelector("i").style.opacity = .35 + .65 * Math.abs(Math.cos(t * 3)); P(c.rec, 300, 545, { o: k(t, 1.7, 2.0) }); } });
-trailer("06", "Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux pour apprendre…", "#FDE5D3", 5.0, {
-  mk(box) { return { e: [["film", "#FDE5D3"], ["mic", "#DCE9FB"], ["book", "#FAF0C8"], ["gamepad", "#E7E0FA"], ["globe", "#DCF1E4"]].map(([n, col]) => E(`<div class="v-big"><div style="width:230px;height:230px;border-radius:50%;background:${col};display:grid;place-items:center">${ICO(n, 170)}</div></div>`, "", box)) }; },
-  up(c, t) { c.e.forEach((el, j) => { const a = j ? .6 + j * .75 : -1, q = eo(k(t, a, a + .3)), z = j < 4 ? k(t, .6 + (j + 1) * .75 - .1, .6 + (j + 1) * .75 + .06) : 0;
-    P(el, 300 - 60 * z, 300, { s: lerp(.85, 1, q), o: q * (1 - z), r: lerp(-4, 0, q) }); }); } });
+  up(c, t) { const close = ei(k(t, .9, 1.05)), hit = Math.exp(-Math.max(0, t - 1.05) * 10) * (t > 1.05 ? 1 : 0);
+    P(c.c, 300, 340 + 10 * hit, { r: -3 + 2 * hit, s: 1 + .03 * hit }); c.arm.setAttribute("transform", `rotate(${lerp(-26, 0, close)} 30 76)`);
+    P(c.act, 300, 95); ktUp(c.act, t, 1.1);
+    c.rec.querySelector("i").style.opacity = .35 + .65 * Math.abs(Math.cos(t * 3)); P(c.rec, 300, 545, { s: bk(k(t, 1.5, 1.9)) }); } });
+activite("Et bien plus…", "Stop motion, podcasts,\nlivres numériques,\njeux éducatifs…", 5, 5.4, {
+  mk(box) { const L = [["film", "#FDE5D3"], ["mic", "#DCE9FB"], ["book", "#FAF0C8"], ["gamepad", "#E7E0FA"], ["globe", "#DCF1E4"]];
+    return { e: L.map(([n, col]) => { const el = E(`<div class="v-bulle" style="width:200px;height:200px;background:${col}">${ICO(n, 130)}</div>`, "", box); return { el, svg: el.querySelector("svg") }; }) }; },
+  up(c, t) { c.e.forEach(({ el, svg }, j) => { const a = .1 + j * .38, ang = -Math.PI / 2 + j * 2 * Math.PI / 5;
+    P(el, 300 + 185 * Math.cos(ang), 300 + 185 * Math.sin(ang), { s: bk(k(t, a, a + .4)) * (1 + .04 * Math.sin(t * 3 + j)) });
+    trace(svg, t, a + .2, .5, .06); }); } });
 
-SCENES.push({ d: 8.5, m: "color",
-  mk() { const c = { bg: E(WHITE) }; c.r = ronds();
-    c.l1 = E(`<div class="v-h" style="font-size:100px">1 élève.</div>`); c.l2 = E(`<div class="v-h" style="font-size:100px">1 tablette.</div>`);
-    c.l3 = E(`<div class="v-h" style="font-size:104px">1 000 façons d’<span class="v-mk">apprendre</span>.</div>`);
-    c.sch = E(`<div class="v-eye">EESSCF Le Chêneux · StarTechs Days 2026</div>`);
-    c.q = E(`<div class="v-h" style="font-size:112px">Et toi, que vas-tu créer<span style="color:#F0997B"> ?</span></div>`); return c; },
-  up(c, t) { P(c.bg, 800, 450); rondsUp(c.r, t, k(t, 0, .4));
-    const up = eo(k(t, 3.2, 4.0)), f = (a) => eo(k(t, a, a + .5));
-    P(c.l1, 800, lerp(250, 110, up) + 40 * (1 - f(0)), { s: lerp(1, .55, up), o: f(0) });
-    P(c.l2, 800, lerp(390, 190, up) + 40 * (1 - f(.7)), { s: lerp(1, .55, up), o: f(.7) });
-    P(c.l3, 800, lerp(540, 275, up) + 40 * (1 - f(1.4)), { s: lerp(1, .6, up), o: f(1.4) });
-    P(c.q, 800, 530 + 50 * (1 - f(4.2)), { o: f(4.2) });
-    P(c.sch, 800, 760, { o: k(t, 5.0, 5.5) }); } });
-
+/* ===== 8. Fin : le résumé, la question, puis l'iPad se range dans la mallette.
+   En #boucle, la mallette s'envole par le haut : la vidéo recommence quand elle retombe. ===== */
+const FIN_D = 10.5;
+SCENES.push({ d: FIN_D, m: "color",
+  mk() { const c = {};
+    c.om = E(OMBRE); c.arr = E(MAL_ARR); c.lid = c.arr.querySelector(".mal-lid");
+    c.h = accueil(ST); c.av = E(MAL_AV); c.lat = [...c.av.querySelectorAll(".lat")];
+    c.l1 = E(KT("1 élève.", 100)); c.l2 = E(KT("1 tablette.", 100)); c.l3 = E(KT("1 001 façons d’[apprendre].", 104));
+    c.sch = E(`<div class="v-eye"><span class="ln"><span class="in">EESSCF Le Chêneux · StarTechs Days 2026</span></span></div>`);
+    c.q = E(KT("Et toi, que vas-tu créer ?", 112)); return c; },
+  up(c, t) { const z = BOUCLE ? FIN_D - 1.3 : 99;
+    /* Le résumé, pendant que l'iPad se pose en bas */
+    P(c.l1, 800, 150); ktUp(c.l1, t, .7, 3.4);
+    P(c.l2, 800, 265); ktUp(c.l2, t, .95, 3.45);
+    P(c.l3, 800, 390); ktUp(c.l3, t, 1.2, 3.5);
+    P(c.q, 800, 170); ktUp(c.q, t, 3.8, z, .09);
+    P(c.sch, 800, 285); ktUp(c.sch, t, 4.6, z);
+    /* La mallette monte, ouverte ; l'iPad tombe dedans ; le couvercle se ferme, les fermoirs claquent */
+    const ri = bk(k(t, 5.35, 6.05)), saut = BOUCLE ? ei(k(t, FIN_D - .75, FIN_D - .1)) : 0;
+    const dr = ei(k(t, 6.15, 6.55)), im = t - 6.55, choc = im > 0 ? 7 * Math.exp(-im * 14) * Math.sin(im * 60) : 0;
+    const my = lerp(1350, 650, ri) + choc - 1150 * saut;
+    const sq = BOUCLE ? .1 * Math.sin(Math.PI * k(t, FIN_D - 1.0, FIN_D - .75)) : 0;
+    [c.arr, c.av].forEach(el => { P(el, 800, my, { o: ri > 0 ? 1 : 0 }); el.firstChild.style.transform = `scale(${1 + sq * .5},${1 - sq})`; });
+    P(c.om, 800, 860, { s: lerp(.4, 1, k(ri, 0, 1)) * (1 - .6 * saut), o: k(t, 5.6, 6.05) * (1 - k(saut, 0, .4)) });
+    const fe = eo(k(t, 6.85, 7.35)); c.lid.style.transform = `rotateX(${-150 * (1 - fe)}deg)`;
+    c.lat.forEach((l, j) => { const q = 1 - eo(k(t, 7.4 + j * .08, 7.62 + j * .08)), x = j ? 339 : 119;
+      l.setAttribute("transform", `translate(0 ${-10 * q}) rotate(${-22 * q} ${x} 104)`); });
+    /* L'iPad : plein écran → petit en bas → au-dessus de la mallette → dedans */
+    const a1 = io(k(t, 0, .8)), a2 = io(k(t, 5.0, 5.5));
+    const s = lerp(lerp(1, .42, a1), .34, a2), y = lerp(lerp(lerp(450, 640, a1), 470, a2), 711 + my - 650, dr);
+    c.h.w.style.transformOrigin = "0 0"; c.h.w.style.transform = `translate(${800 - 800 * s}px,${(y - 450 * s).toFixed(2)}px) scale(${s})`;
+    c.h.w.style.opacity = t < 7.35 ? 1 : 0; } });
 /* ---------- Lecteur ---------- */
 const TOTAL = SCENES.reduce((s, x) => s + x.d, 0);
 const FOND = .4, PV = document.createElement("div"); PV.id = "stage-prev"; ST.after(PV);
@@ -1079,8 +1281,8 @@ function render() {
   const [i, t] = sceneAt(T);
   const muet = SCENES[i].m === "muet", fx = $("fx");
   JIT = muet ? 1 : 0;
-  if (i !== cur) { /* Fondu enchaîné 0,4 s : on garde une copie de la scène qui part, posée au-dessus */
-    if (cur >= 0 && (SCENES[i].tr !== "push" || REDUIT_V)) { PV.innerHTML = ST.innerHTML; PV.className = ST.className; } else PV.innerHTML = "";
+  if (i !== cur) { /* v3 : pas de fondu, chaque scène commence sur la dernière image de la précédente (fondu seulement en mouvement réduit) */
+    if (cur >= 0 && (SCENES[i].tr === "fondu" || REDUIT_V)) { PV.innerHTML = ST.innerHTML; PV.className = ST.className; } else PV.innerHTML = "";
     ST.innerHTML = ""; ST.className = SCENES[i].m; ctx = SCENES[i].mk(); cur = i; }
   SCENES[i].up(ctx, t);
   fx.classList.toggle("on", muet);
@@ -1124,6 +1326,8 @@ $("vHome").addEventListener("click", closeVideo);
 $("vAgain").addEventListener("click", () => { T = 0; cur = -1; render(); setPlaying(true); });
 $("box").addEventListener("click", e => { if (e.target.closest(".endmenu")) return; setPlaying(!playing); });
 /* Pour les tests automatiques : aller à un moment précis de la vidéo */
+/* Prépare en avance les 1 001 icônes (sinon la scène 5 démarre sur une image lente) */
+if (document.fonts) document.fonts.ready.then(() => setTimeout(() => { cibles1001(); sprites(); }, 300)); else setTimeout(() => { cibles1001(); sprites(); }, 300);
 window.__video = { aller(s) { T = s; cur = -1; PV.innerHTML = ""; render(); }, pas(dt) { T += dt; render(); }, duree: TOTAL };
 addEventListener("resize", () => { if (!$("player").hidden) { fit(); render(); } });
 addEventListener("keydown", e => {

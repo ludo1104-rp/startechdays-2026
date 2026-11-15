@@ -1329,7 +1329,9 @@ function closeVideo() {
 $("vClose").addEventListener("click", closeVideo);
 $("vHome").addEventListener("click", closeVideo);
 $("vAgain").addEventListener("click", () => { T = 0; cur = -1; render(); setPlaying(true); });
-$("box").addEventListener("click", e => { if (e.target.closest(".endmenu")) return; setPlaying(!playing); });
+let reprise = 0; /* #boucle (stand) : après une pause au toucher, la vidéo repart seule au bout de 8 s */
+$("box").addEventListener("click", e => { if (e.target.closest(".endmenu")) return; setPlaying(!playing);
+  clearTimeout(reprise); if (BOUCLE && !playing) reprise = setTimeout(() => setPlaying(true), 8000); });
 /* Pour les tests automatiques : aller à un moment précis de la vidéo */
 /* Prépare en avance les 1 001 icônes (sinon la scène 5 démarre sur une image lente) */
 if (document.fonts) document.fonts.ready.then(() => setTimeout(() => { cibles1001(); sprites(); }, 300)); else setTimeout(() => { cibles1001(); sprites(); }, 300);
@@ -1341,10 +1343,13 @@ addEventListener("orientationchange", () => { refit(); setTimeout(refit, 250); s
 if (window.visualViewport) visualViewport.addEventListener("resize", refit);
 addEventListener("keydown", e => {
   if ($("player").hidden) return;
-  if (e.key === "Escape") closeVideo();
+  if (e.key === "Escape") { if (!BOUCLE) closeVideo(); }
   else if (e.key === " " && !(e.target instanceof HTMLButtonElement)) { e.preventDefault(); setPlaying(!playing); }
 });
-document.addEventListener("visibilitychange", () => { if (document.hidden && playing) setPlaying(false); });
+document.addEventListener("visibilitychange", () => { if (document.hidden && playing) setPlaying(false);
+  else if (!document.hidden && BOUCLE) { setPlaying(true); garderEcran(); } });
+/* #boucle : l'écran reste allumé (si le navigateur le permet) */
+function garderEcran() { if (BOUCLE && navigator.wakeLock) navigator.wakeLock.request("screen").catch(() => {}); }
 
 
 /* =====================================================================
@@ -1386,6 +1391,7 @@ $("openVideo").addEventListener("click", e => {
     if (voile.animate) voile.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 380, easing: "ease-out" }).onfinish = leverVoile;
   });
 });
+if (BOUCLE) { $("vClose").style.display = "none"; garderEcran(); addEventListener("pointerdown", garderEcran, { once: true }); }
 if (location.hash === "#video" || BOUCLE) openVideo();
 
 /* Minecraft : fenêtre avec deux choix */

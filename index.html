@@ -213,6 +213,8 @@ html.aimant #titre{animation:none}
 .close{position:absolute;top:max(.75rem,env(safe-area-inset-top));right:max(.75rem,env(safe-area-inset-right));z-index:3}
 .tourne{position:absolute;bottom:.75rem;left:50%;transform:translateX(-50%);display:none;align-items:center;gap:.5rem;font-size:.875rem;color:var(--muted);white-space:nowrap}
 @media (orientation:portrait) and (max-width:600px){.tourne{display:flex}}
+/* Téléphone en paysage : la vidéo prend toute la hauteur, « Fermer » devient une simple croix */
+@media (max-height:500px){.screen{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}.close{top:.5rem;right:max(.5rem,env(safe-area-inset-right));width:2.75rem;padding:0;gap:0;font-size:0}}
 .en-pause{position:absolute;inset:0;z-index:2;display:grid;place-items:center;pointer-events:none;color:#0a0a0a}
 .en-pause svg{box-sizing:content-box;padding:26px 22px 26px 30px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 10px 30px rgba(10,10,10,.18)}
 .en-pause[hidden]{display:none}
@@ -1309,7 +1311,10 @@ function setPlaying(p) {
 }
 let SCALE = 1;
 function fit() {
-  const sc = $("screen"), w = sc.clientWidth - 24, h = sc.clientHeight - (innerWidth < 600 ? 120 : 84);
+  const sc = $("screen"), cs = getComputedStyle(sc), px = v => parseFloat(cs[v]) || 0;
+  const W = sc.clientWidth - px("paddingLeft") - px("paddingRight"), H = sc.clientHeight - px("paddingTop") - px("paddingBottom");
+  const court = H < 500; /* téléphone en paysage : presque toute la hauteur */
+  const w = W - (court ? 8 : 24), h = H - (court ? 8 : innerWidth < 600 ? 120 : 84);
   SCALE = Math.max(.1, Math.min(w / 1600, h / 900));
   const box = $("box"); box.style.width = 1600 * SCALE + "px"; box.style.height = 900 * SCALE + "px";
   ST.style.transform = `scale(${SCALE})`;
@@ -1329,7 +1334,11 @@ $("box").addEventListener("click", e => { if (e.target.closest(".endmenu")) retu
 /* Prépare en avance les 1 001 icônes (sinon la scène 5 démarre sur une image lente) */
 if (document.fonts) document.fonts.ready.then(() => setTimeout(() => { cibles1001(); sprites(); }, 300)); else setTimeout(() => { cibles1001(); sprites(); }, 300);
 window.__video = { aller(s) { T = s; cur = -1; PV.innerHTML = ""; render(); }, pas(dt) { T += dt; render(); }, duree: TOTAL };
-addEventListener("resize", () => { if (!$("player").hidden) { fit(); render(); } });
+/* Rotation : sur iPhone, la nouvelle taille arrive parfois en retard, on recalcule encore un peu après */
+const refit = () => { if (!$("player").hidden) { fit(); render(); } };
+addEventListener("resize", refit);
+addEventListener("orientationchange", () => { refit(); setTimeout(refit, 250); setTimeout(refit, 600); });
+if (window.visualViewport) visualViewport.addEventListener("resize", refit);
 addEventListener("keydown", e => {
   if ($("player").hidden) return;
   if (e.key === "Escape") closeVideo();
